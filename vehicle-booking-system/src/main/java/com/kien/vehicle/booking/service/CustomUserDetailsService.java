@@ -31,7 +31,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     return new UsernameNotFoundException("Không tìm thấy người dùng với số điện thoại: " + phone);
                 });
 
-        String role = "ROLE_" + user.getRole().toUpperCase(); // map thành ROLE_USER / ROLE_ADMIN cho Spring Security
+        String role = "ROLE_" + user.getRole().toUpperCase();
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getPhone())

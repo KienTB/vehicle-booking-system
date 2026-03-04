@@ -1,8 +1,8 @@
 package com.kien.vehicle.booking.dto.request;
 
 public record ChangePasswordRequest(
-        String name,
-        String email,
-        String driveLicense
+        String oldPassword,
+        String newPassword,
+        String confirmPassword
 ) {
 }
