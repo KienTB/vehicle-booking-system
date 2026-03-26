@@ -24,19 +24,36 @@ public class SecurityConfig {
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
+    @Autowired
+    private RateLimitingFilter rateLimitingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
+
+                        .requestMatchers("/api/cars/**").permitAll()
+
                         .requestMatchers("/api/user/me").authenticated()
-                        // Các endpoint admin sau này: .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // Các endpoint user: .requestMatchers("/api/bookings/**").hasRole("USER")
+
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        .requestMatchers("/api/bookings/**").hasRole("USER")
+                        .requestMatchers("/api/admin/bookings/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

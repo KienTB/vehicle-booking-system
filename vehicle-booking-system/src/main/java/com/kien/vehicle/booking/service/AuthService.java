@@ -61,8 +61,8 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getPhone());
         String token = jwtService.generateToken(userDetails);
 
-        // Giả sử bạn có RefreshTokenService, ở đây tạm bỏ qua hoặc thêm sau
-        String refreshToken = "dummy-refresh-token-for-now"; // Thay bằng logic thực sau
+        // thêm sau
+        String refreshToken = "dummy-refresh-token-for-now";
 
         return new AuthenticationResponse(
                 token,
@@ -87,7 +87,6 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.phone());
         String token = jwtService.generateToken(userDetails);
 
-        // Tương tự refresh token
         String refreshToken = "dummy-refresh-token-for-now";
 
         User user = userRepository.findByPhone(request.phone())
@@ -102,6 +101,4 @@ public class AuthService {
                 user.getRole()
         );
     }
-
-    // Change password & refresh sẽ thêm ở bước sau nếu cần
 }

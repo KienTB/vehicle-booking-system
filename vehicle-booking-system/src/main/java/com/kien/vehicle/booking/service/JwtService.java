@@ -17,7 +17,7 @@ import java.util.function.Function;
 public class JwtService {
 
     @Value("${jwt.secret-key}")
-    private String secretKey;  // phải là Base64 string, ví dụ: "yourVeryLongBase64SecretKeyAtLeast44CharsForHS256=="
+    private String secretKey;
 
     @Value("${jwt.expiration}")
     private long jwtExpiration;
@@ -37,7 +37,7 @@ public class JwtService {
 
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSignInKey())               // verifyWith nhận SecretKey
+                .verifyWith(getSignInKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
@@ -76,7 +76,7 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .signWith(getSignInKey())  // signWith nhận SecretKey
+                .signWith(getSignInKey())
                 .compact();
     }
 }

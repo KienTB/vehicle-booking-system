@@ -42,4 +42,41 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse<>(false, "Lỗi hệ thống. Vui lòng thử lại sau", null));
     }
+
+    @ExceptionHandler(LicensePlateAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<String>> handleLicensePlateAlreadyExistsException(
+            LicensePlateAlreadyExistsException ex) {
+        logger.warn("License plate conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(CarNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleCarNotFoundException(
+            CarNotFoundException ex) {
+        logger.warn("Car not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(BookingNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleBookingNotFoundException(BookingNotFoundException ex) {
+        logger.warn("Booking not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(BookingConflictException.class)
+    public ResponseEntity<ApiResponse<String>> handleBookingConflictException(BookingConflictException ex) {
+        logger.warn("Booking conflict: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)  // 409 Conflict
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(InvalidBookingStatusException.class)
+    public ResponseEntity<ApiResponse<String>> handleInvalidBookingStatusException(InvalidBookingStatusException ex) {
+        logger.warn("Invalid booking status: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
 }
