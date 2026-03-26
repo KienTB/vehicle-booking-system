@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/com.kien.vehicle-booking-system.main.iml" filepath="$PROJECT_DIR$/.idea/modules/com.kien.vehicle-booking-system.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/vehicle-booking-system.iml" filepath="$PROJECT_DIR$/.idea/vehicle-booking-system.iml" />
-    </modules>
-  </component>
-</project>

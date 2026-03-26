@@ -11,6 +11,7 @@ import com.kien.vehicle.booking.repository.BookingRepository;
 import com.kien.vehicle.booking.repository.CarRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
 import com.kien.vehicle.booking.service.BookingService;
+import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final CarRepository carRepository;
     private final UserRepository userRepository;
+    private final InvoiceService invoiceService;
 
     @Override
     @Transactional
@@ -37,7 +39,6 @@ public class BookingServiceImpl implements BookingService {
         Car car = carRepository.findById(request.carId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy xe"));
 
-        // Kiểm tra trùng thời gian bằng native query
         List<Booking> overlapping = bookingRepository.findOverlappingBookings(
                 car.getCarId(),
                 request.startDate(),
@@ -59,7 +60,6 @@ public class BookingServiceImpl implements BookingService {
         long days = request.startDate().until(request.endDate()).getDays() + 1;
         BigDecimal totalPrice = car.getPricePerDay().multiply(BigDecimal.valueOf(days));
 
-        // Tạo booking mới
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setCar(car);
@@ -145,21 +145,20 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse confirmBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException(bookingId));
-
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
         if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new InvalidBookingStatusException(
-                    booking.getStatus(),
-                    BookingStatus.CONFIRMED
+            throw new InvalidBookingStatusException(booking.getStatus(), BookingStatus.CONFIRMED
             );
         }
 
         booking.setStatus(BookingStatus.CONFIRMED);
         booking = bookingRepository.save(booking);
 
-        // TODO: Sau này thêm logic tạo Invoice tự động ở đây
-        // Ví dụ: invoiceService.createInvoiceForBooking(booking);
+        try {
+            invoiceService.createInvoiceForBooking(booking);
+        } catch (Exception e) {
+            throw new RuntimeException("Xác nhận booking thành công nhưng tạo hoá đơn thất bại: " + e.getMessage());
+        }
 
         return mapToResponse(booking);
     }

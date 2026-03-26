@@ -4,7 +4,6 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -33,7 +32,6 @@ public class OpenApiConfig {
                                 .url("http://localhost:8080")
                                 .description("Development Server")
                 ))
-                // Cấu hình JWT Authentication cho Swagger UI
                 .addSecurityItem(new SecurityRequirement()
                         .addList("Bearer Authentication"))
                 .components(new Components()

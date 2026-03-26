@@ -116,15 +116,30 @@ Cho phép USER tạo/xem booking, ADMIN duyệt/hủy booking, kiểm tra trùng
 - PUT    /api/admin/bookings/{id}/cancel  → Hủy booking
 
 ### Module 6 – Invoice Management
-- Tự động tạo khi confirm booking
-- Xem invoice
 
-**Endpoint**:
-- GET /api/invoices/my-invoices
-- GET /api/invoices/{id}
-- GET /api/admin/invoices
+**Mục tiêu**:  
+Tự động tạo hóa đơn (Invoice) khi booking được ADMIN xác nhận (confirm).  
+Hỗ trợ USER xem hóa đơn của mình và ADMIN quản lý tất cả hóa đơn.
 
-**Rules**: 1 Booking → 1 Invoice (UNPAID → PAID)
+**Business Rules**:
+- Khi booking chuyển từ `PENDING` → `CONFIRMED` → tự động tạo Invoice với status `UNPAID`
+- Mối quan hệ **1-1** giữa Booking và Invoice (mỗi booking chỉ có tối đa 1 invoice)
+- Invoice không thể tạo thủ công
+- Tổng tiền (`totalAmount`) = `totalPrice` của Booking
+- USER chỉ xem được hóa đơn của chính mình
+- ADMIN xem được tất cả hóa đơn
+- Status Invoice: `UNPAID` → `PAID` / `FAILED` (sẽ xử lý ở Module 7)
+
+**Endpoints**:
+
+**USER**:
+- `GET    /api/invoices/my-invoices`          → Xem danh sách hóa đơn của tôi
+- `GET    /api/invoices/{id}`                 → Xem chi tiết hóa đơn (chỉ của tôi)
+
+**ADMIN**:
+- `GET    /api/admin/invoices`                → Xem tất cả hóa đơn trong hệ thống
+
+---
 
 ### Module 7 – Payment Management
 - USER thanh toán

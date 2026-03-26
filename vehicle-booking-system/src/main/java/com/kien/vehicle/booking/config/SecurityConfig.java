@@ -34,15 +34,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
 
-                        .requestMatchers(
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
-                        ).permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         .requestMatchers("/api/cars/**").permitAll()
 
                         .requestMatchers("/api/user/me").authenticated()
+
+                        .requestMatchers("api/invoices/**").hasRole("USER")
+                        .requestMatchers("api/admin/invoices").hasRole("ADMIN")
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 

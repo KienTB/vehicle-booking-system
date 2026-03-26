@@ -79,4 +79,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse<>(false, ex.getMessage(), null));
     }
+
+    @ExceptionHandler(InvoiceNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleInvoiceNotFoundException(InvoiceNotFoundException ex) {
+        logger.warn("Invoice not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(InvoiceAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<String>> handleInvoiceAlreadyExistsException(InvoiceAlreadyExistsException ex) {
+        logger.warn("Invoice already exists: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(InvalidInvoiceStatusException.class)
+    public ResponseEntity<ApiResponse<String>> handleInvalidInvoiceStatusException(InvalidInvoiceStatusException ex) {
+        logger.warn("Invalid invoice status: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
 }
