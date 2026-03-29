@@ -1,14 +1,12 @@
 package com.kien.vehicle.booking.controller;
 
-import com.kien.vehicle.booking.dto.request.CarCreateRequest;
-import com.kien.vehicle.booking.dto.request.CarUpdateRequest;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
+import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
 import com.kien.vehicle.booking.model.CarStatus;
 import com.kien.vehicle.booking.service.CarService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,5 +48,12 @@ public class CarController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Lấy chi tiết xe thành công", car)
         );
+    }
+
+    @GetMapping("/{id}/availability")
+    public ResponseEntity<ApiResponse<CarAvailabilityResponse>> getCarAvailability(@PathVariable Long id) {
+        CarAvailabilityResponse availabilityResponse = carService.getCarAvailability(id);
+        return ResponseEntity.ok(
+                new ApiResponse<>(true, "Lấy lịch xe thành công", availabilityResponse));
     }
 }

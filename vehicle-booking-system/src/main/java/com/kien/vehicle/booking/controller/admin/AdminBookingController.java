@@ -27,14 +27,6 @@ public class AdminBookingController {
         );
     }
 
-    @PutMapping("/{id}/confirm")
-    public ResponseEntity<ApiResponse<BookingResponse>> confirmBooking(@PathVariable Long id) {
-        BookingResponse response = bookingService.confirmBooking(id);
-        return ResponseEntity.ok(
-                new ApiResponse<>(true, "Duyệt booking thành công", response)
-        );
-    }
-
     @PutMapping("/{id}/cancel")
     public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Long id) {
         BookingResponse response = bookingService.cancelBooking(id, null, true);

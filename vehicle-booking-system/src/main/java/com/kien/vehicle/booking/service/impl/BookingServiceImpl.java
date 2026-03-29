@@ -70,6 +70,10 @@ public class BookingServiceImpl implements BookingService {
 
         booking = bookingRepository.save(booking);
 
+        car.setStatus(CarStatus.BOOKED);
+        carRepository.save(car);
+
+        invoiceService.createInvoiceForBooking(booking);
         return mapToResponse(booking);
     }
 
@@ -97,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
         return new BookingResponse(
                 booking.getBookingId(),
                 booking.getUser().getUserId(),
+                booking.getInvoice().getInvoiceId(),
                 booking.getUser().getName(),
                 booking.getUser().getPhone(),
                 booking.getCar().getCarId(),
@@ -137,27 +142,6 @@ public class BookingServiceImpl implements BookingService {
             if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
                 throw new IllegalArgumentException("Bạn không có quyền xem booking này");
             }
-        }
-
-        return mapToResponse(booking);
-    }
-
-    @Override
-    @Transactional
-    public BookingResponse confirmBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new BookingNotFoundException(bookingId));
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new InvalidBookingStatusException(booking.getStatus(), BookingStatus.CONFIRMED
-            );
-        }
-
-        booking.setStatus(BookingStatus.CONFIRMED);
-        booking = bookingRepository.save(booking);
-
-        try {
-            invoiceService.createInvoiceForBooking(booking);
-        } catch (Exception e) {
-            throw new RuntimeException("Xác nhận booking thành công nhưng tạo hoá đơn thất bại: " + e.getMessage());
         }
 
         return mapToResponse(booking);

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 public record BookingResponse(
         Long bookingId,
         Long userId,
+        Long invoiceId,
         String userName,
         String userPhone,
         Long carId,

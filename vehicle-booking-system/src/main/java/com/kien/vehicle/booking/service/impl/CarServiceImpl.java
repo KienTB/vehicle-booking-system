@@ -2,12 +2,16 @@ package com.kien.vehicle.booking.service.impl;
 
 import com.kien.vehicle.booking.dto.request.CarCreateRequest;
 import com.kien.vehicle.booking.dto.request.CarUpdateRequest;
+import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
 import com.kien.vehicle.booking.exception.CarNotFoundException;
 import com.kien.vehicle.booking.exception.LicensePlateAlreadyExistsException;
+import com.kien.vehicle.booking.model.Booking;
+import com.kien.vehicle.booking.model.BookingStatus;
 import com.kien.vehicle.booking.model.Car;
 import com.kien.vehicle.booking.model.CarStatus;
+import com.kien.vehicle.booking.repository.BookingRepository;
 import com.kien.vehicle.booking.repository.CarRepository;
 import com.kien.vehicle.booking.service.CarService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,7 @@ import java.util.stream.Collectors;
 public class CarServiceImpl implements CarService {
 
     private final CarRepository carRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
@@ -118,6 +124,27 @@ public class CarServiceImpl implements CarService {
                 .filter(car -> (status == null || car.getStatus() == status))
                 .map(this::mapToSummary)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CarAvailabilityResponse getCarAvailability(Long carId) {
+        Car car = carRepository.findById(carId).orElseThrow(() -> new CarNotFoundException("Không tìm thấy xe ID: " + carId));
+        LocalDate today = LocalDate.now();
+        List<Booking> acticeBookings = bookingRepository.findActiveBookingsByCarId(carId, today, List.of(BookingStatus.PENDING, BookingStatus.COMPLETED));
+        List<LocalDate> bookedDates = acticeBookings.stream()
+                .flatMap(booking -> booking.getStartDate()
+                        .datesUntil(booking.getEndDate().plusDays(1)))
+                .filter(localDate -> !localDate.isBefore(today))
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+
+        return new CarAvailabilityResponse(
+                car.getCarId(),
+                car.getName(),
+                car.getLicensePlate(),
+                bookedDates
+        );
     }
 
     private CarResponse mapToResponse(Car car) {

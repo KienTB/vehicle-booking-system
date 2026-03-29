@@ -1,9 +1,12 @@
 package com.kien.vehicle.booking.service;
 
 import com.kien.vehicle.booking.dto.request.LoginRequest;
+import com.kien.vehicle.booking.dto.request.RefreshTokenRequest;
 import com.kien.vehicle.booking.dto.request.RegisterRequest;
 import com.kien.vehicle.booking.dto.response.AuthenticationResponse;
+import com.kien.vehicle.booking.model.RefreshToken;
 import com.kien.vehicle.booking.model.User;
+import com.kien.vehicle.booking.repository.RefreshTokenRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +41,9 @@ public class AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
     public AuthenticationResponse register(RegisterRequest request) {
         Optional<User> existingUser = userRepository.findByPhone(request.phone());
         if (existingUser.isPresent()) {
@@ -59,14 +65,12 @@ public class AuthService {
         logger.info("User registered successfully: {}", user.getPhone());
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getPhone());
-        String token = jwtService.generateToken(userDetails);
-
-        // thêm sau
-        String refreshToken = "dummy-refresh-token-for-now";
+        String accessToken = jwtService.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return new AuthenticationResponse(
-                token,
-                refreshToken,
+                accessToken,
+                refreshToken.getToken(),
                 user.getUserId(),
                 user.getName(),
                 user.getPhone(),
@@ -84,21 +88,44 @@ public class AuthService {
             throw new BadCredentialsException("Số điện thoại hoặc mật khẩu không đúng");
         }
 
+        User user = userRepository.findByPhone(request.phone()).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.phone());
-        String token = jwtService.generateToken(userDetails);
-
-        String refreshToken = "dummy-refresh-token-for-now";
-
-        User user = userRepository.findByPhone(request.phone())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        String accessToken = jwtService.generateToken(userDetails);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
         return new AuthenticationResponse(
-                token,
-                refreshToken,
+                accessToken,
+                refreshToken.getToken(),
                 user.getUserId(),
                 user.getName(),
                 user.getPhone(),
                 user.getRole()
         );
+    }
+
+    public AuthenticationResponse refresh(RefreshTokenRequest request){
+        RefreshToken newRefreshToken = refreshTokenService.rotateRefreshToken(request.refreshToken());
+
+        User user = newRefreshToken.getUser();
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getPhone());
+        String newAccessToken = jwtService.generateToken(userDetails);
+
+        logger.info("Token refreshed for user: {}", user.getPhone());
+
+        return new AuthenticationResponse(
+                newAccessToken,
+                newRefreshToken.getToken(),
+                user.getUserId(),
+                user.getName(),
+                user.getPhone(),
+                user.getRole()
+        );
+    }
+
+    public void logout(String currrentUserPhone){
+        User user = userRepository.findByPhone(currrentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        refreshTokenService.deleteByUserId(user.getUserId());
+        logger.info("User logged out: {}", currrentUserPhone);
     }
 }

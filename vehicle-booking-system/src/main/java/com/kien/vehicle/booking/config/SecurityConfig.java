@@ -33,20 +33,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-
                         .requestMatchers("/api/cars/**").permitAll()
 
                         .requestMatchers("/api/user/me").authenticated()
-
-                        .requestMatchers("api/invoices/**").hasRole("USER")
-                        .requestMatchers("api/admin/invoices").hasRole("ADMIN")
+                        .requestMatchers("/api/bookings/**").hasRole("USER")
+                        .requestMatchers("/api/invoices/**").hasRole("USER")
+                        .requestMatchers("/api/payments/**").hasRole("USER")
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        .requestMatchers("/api/bookings/**").hasRole("USER")
-                        .requestMatchers("/api/admin/bookings/**").hasRole("ADMIN")
+                        .requestMatchers("/api/auth/logout").authenticated()
 
                         .anyRequest().authenticated()
                 )

@@ -100,4 +100,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiResponse<>(false, ex.getMessage(), null));
     }
+
+    @ExceptionHandler(PaymentNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handlePaymentNotFoundException(PaymentNotFoundException ex) {
+        logger.warn("Payment not found: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(PaymentAlreadyExistsException.class)
+    public ResponseEntity<ApiResponse<String>> handlePaymentAlreadyExistsException(PaymentAlreadyExistsException ex) {
+        logger.warn("Payment already exists: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(InvalidPaymentStatusException.class)
+    public ResponseEntity<ApiResponse<String>> handleInvalidPaymentStatusException(InvalidPaymentStatusException ex) {
+        logger.warn("Invalid payment status: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(PaymentNotAllowedException.class)
+    public ResponseEntity<ApiResponse<String>> handlePaymentNotAllowedException(PaymentNotAllowedException ex) {
+        logger.warn("Payment not allowed: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<ApiResponse<String>> handleRefreshTokenException(RefreshTokenException ex) {
+        logger.warn("Refresh token error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    }
 }

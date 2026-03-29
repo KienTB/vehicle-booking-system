@@ -34,10 +34,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new InvoiceAlreadyExistsException(booking.getBookingId());
         }
 
-        if(booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new InvalidBookingStatusException(booking.getStatus(), BookingStatus.CONFIRMED);
-        }
-
         String invoiceNumber = generateInvoiceNumber();
 
         Invoice invoice = new Invoice();
@@ -80,8 +76,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceSummaryResponse> getAllInvoices() {
-        List<Invoice> invoices = invoiceRepository.findAll();
+    public List<InvoiceSummaryResponse> getAllInvoices(InvoiceStatus invoiceStatus) {
+        List<Invoice> invoices;
+        if(invoiceStatus != null){
+            invoices = invoiceRepository.findByStatus(invoiceStatus);
+        } else {
+            invoices = invoiceRepository.findAll();
+        }
         return invoices.stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 

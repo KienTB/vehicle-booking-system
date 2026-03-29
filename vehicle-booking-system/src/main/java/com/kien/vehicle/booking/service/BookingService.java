@@ -16,7 +16,5 @@ public interface BookingService {
 
     BookingResponse getBookingById(Long bookingId, String currentUserPhone, boolean isAdmin);
 
-    BookingResponse confirmBooking(Long bookingId);
-
     BookingResponse cancelBooking(Long bookingId, String currentUserPhone, boolean isAdmin);
 }

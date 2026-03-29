@@ -1,12 +1,14 @@
 package com.kien.vehicle.booking.controller;
 
 import com.kien.vehicle.booking.dto.request.LoginRequest;
+import com.kien.vehicle.booking.dto.request.RefreshTokenRequest;
 import com.kien.vehicle.booking.dto.request.RegisterRequest;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.AuthenticationResponse;
 import com.kien.vehicle.booking.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,5 +42,17 @@ public class AuthController {
 
         AuthenticationResponse response = authService.login(request);
         return ResponseEntity.ok(new ApiResponse<>(true, "Đăng nhập thành công", response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> refresh(@RequestBody RefreshTokenRequest request) {
+        AuthenticationResponse response = authService.refresh(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Làm mới token thành công", response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(Authentication authentication){
+        authService.logout(authentication.getName());
+        return ResponseEntity.ok(new ApiResponse<>(true, "Đăng xuất thành công", null));
     }
 }
