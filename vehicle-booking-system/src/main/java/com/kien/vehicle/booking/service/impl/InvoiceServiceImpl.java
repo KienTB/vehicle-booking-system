@@ -41,6 +41,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setStatus(InvoiceStatus.UNPAID);
 
         Invoice savedInvoice = invoiceRepository.save(invoice);
+        booking.setInvoice(savedInvoice);
 
         return mapToResponse(savedInvoice);
     }
