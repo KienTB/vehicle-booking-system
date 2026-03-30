@@ -3,6 +3,7 @@ package com.kien.vehicle.booking.service.impl;
 import com.kien.vehicle.booking.dto.request.BookingCreateRequest;
 import com.kien.vehicle.booking.dto.response.BookingResponse;
 import com.kien.vehicle.booking.dto.response.BookingSummaryResponse;
+import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.exception.*;
 import com.kien.vehicle.booking.model.*;
 import com.kien.vehicle.booking.repository.BookingRepository;
@@ -48,11 +49,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (!overlapping.isEmpty()) {
             Booking conflict = overlapping.get(0);
-            throw new AppException(
-                    ErrorCode.BOOKING_DATE_CONFLICT,
-                    conflict.getStartDate(),
-                    conflict.getEndDate()
-            );
+            throw new AppException(ErrorCode.BOOKING_DATE_CONFLICT, conflict.getStartDate(), conflict.getEndDate());
         }
 
         long days = request.startDate().until(request.endDate()).getDays() + 1;
