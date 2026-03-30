@@ -17,7 +17,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("""
     SELECT b FROM Booking b
     WHERE b.car.carId = :carId
-      AND b.status IN ('PENDING')
+      AND b.status IN ('PENDING', 'COMPLETED')
       AND b.startDate <= :endDate
       AND b.endDate >= :startDate
     """)
