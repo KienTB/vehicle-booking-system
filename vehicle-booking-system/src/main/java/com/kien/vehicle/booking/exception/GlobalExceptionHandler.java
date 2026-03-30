@@ -5,134 +5,83 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<String>> handleBadCredentialsException(BadCredentialsException ex) {
-        logger.warn("Bad credentials: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiResponse<>(false, "Số điện thoại hoặc mật khẩu không đúng", null));
+    @ExceptionHandler(AppException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
+        if (errorCode.getHttpStatus().is5xxServerError()) {
+            logger.error("[{}] {}", errorCode.getCode(), ex.getResolvedMessage(), ex);
+        } else {
+            logger.warn("[{}] {}", errorCode.getCode(), ex.getResolvedMessage());
+        }
+
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(ApiResponse.error(errorCode.getCode(), ex.getResolvedMessage()));
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handleUsernameNotFoundException(UsernameNotFoundException ex) {
-        logger.warn("User not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(false, "Không tìm thấy người dùng", null));
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<Void>> handleValidationException(
+            MethodArgumentNotValidException ex) {
+
+        String errorDetails = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(FieldError::getDefaultMessage)
+                .collect(Collectors.joining("; "));
+
+        String message = ErrorCode.VALIDATION_ERROR.getMessage(errorDetails);
+        logger.warn("[VALIDATION_ERROR] {}", message);
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ErrorCode.VALIDATION_ERROR.getCode(), message));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<String>> handleIllegalArgumentException(IllegalArgumentException ex) {
-        logger.warn("Validation error: {}", ex.getMessage());
-        return ResponseEntity.badRequest()
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
+    public ResponseEntity<ApiResponse<Void>> handleAuthException(Exception ex) {
+        logger.warn("[AUTH_INVALID_CREDENTIALS] {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(
+                        ErrorCode.AUTH_INVALID_CREDENTIALS.getCode(),
+                        ErrorCode.AUTH_INVALID_CREDENTIALS.getMessage()
+                ));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
+        logger.warn("[AUTH_FORBIDDEN] {}", ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.error(
+                        ErrorCode.AUTH_FORBIDDEN.getCode(),
+                        ErrorCode.AUTH_FORBIDDEN.getMessage()
+                ));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleGeneralException(Exception ex) {
-        logger.error("Unexpected error occurred", ex);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse<>(false, "Lỗi hệ thống. Vui lòng thử lại sau", null));
-    }
-
-    @ExceptionHandler(LicensePlateAlreadyExistsException.class)
-    public ResponseEntity<ApiResponse<String>> handleLicensePlateAlreadyExistsException(
-            LicensePlateAlreadyExistsException ex) {
-        logger.warn("License plate conflict: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(CarNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handleCarNotFoundException(
-            CarNotFoundException ex) {
-        logger.warn("Car not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(BookingNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handleBookingNotFoundException(BookingNotFoundException ex) {
-        logger.warn("Booking not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(BookingConflictException.class)
-    public ResponseEntity<ApiResponse<String>> handleBookingConflictException(BookingConflictException ex) {
-        logger.warn("Booking conflict: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)  // 409 Conflict
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvalidBookingStatusException.class)
-    public ResponseEntity<ApiResponse<String>> handleInvalidBookingStatusException(InvalidBookingStatusException ex) {
-        logger.warn("Invalid booking status: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvoiceNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handleInvoiceNotFoundException(InvoiceNotFoundException ex) {
-        logger.warn("Invoice not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvoiceAlreadyExistsException.class)
-    public ResponseEntity<ApiResponse<String>> handleInvoiceAlreadyExistsException(InvoiceAlreadyExistsException ex) {
-        logger.warn("Invoice already exists: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvalidInvoiceStatusException.class)
-    public ResponseEntity<ApiResponse<String>> handleInvalidInvoiceStatusException(InvalidInvoiceStatusException ex) {
-        logger.warn("Invalid invoice status: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(PaymentNotFoundException.class)
-    public ResponseEntity<ApiResponse<String>> handlePaymentNotFoundException(PaymentNotFoundException ex) {
-        logger.warn("Payment not found: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(PaymentAlreadyExistsException.class)
-    public ResponseEntity<ApiResponse<String>> handlePaymentAlreadyExistsException(PaymentAlreadyExistsException ex) {
-        logger.warn("Payment already exists: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(InvalidPaymentStatusException.class)
-    public ResponseEntity<ApiResponse<String>> handleInvalidPaymentStatusException(InvalidPaymentStatusException ex) {
-        logger.warn("Invalid payment status: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(PaymentNotAllowedException.class)
-    public ResponseEntity<ApiResponse<String>> handlePaymentNotAllowedException(PaymentNotAllowedException ex) {
-        logger.warn("Payment not allowed: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
-    }
-
-    @ExceptionHandler(RefreshTokenException.class)
-    public ResponseEntity<ApiResponse<String>> handleRefreshTokenException(RefreshTokenException ex) {
-        logger.warn("Refresh token error: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiResponse<>(false, ex.getMessage(), null));
+    public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
+        logger.error("[COMMON_INTERNAL_ERROR] Unexpected error", ex);
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(
+                        ErrorCode.COMMON_INTERNAL_ERROR.getCode(),
+                        ErrorCode.COMMON_INTERNAL_ERROR.getMessage()
+                ));
     }
 }

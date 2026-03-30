@@ -3,9 +3,7 @@ package com.kien.vehicle.booking.service.impl;
 import com.kien.vehicle.booking.dto.request.BookingCreateRequest;
 import com.kien.vehicle.booking.dto.response.BookingResponse;
 import com.kien.vehicle.booking.dto.response.BookingSummaryResponse;
-import com.kien.vehicle.booking.exception.BookingConflictException;
-import com.kien.vehicle.booking.exception.BookingNotFoundException;
-import com.kien.vehicle.booking.exception.InvalidBookingStatusException;
+import com.kien.vehicle.booking.exception.*;
 import com.kien.vehicle.booking.model.*;
 import com.kien.vehicle.booking.repository.BookingRepository;
 import com.kien.vehicle.booking.repository.CarRepository;
@@ -33,11 +31,14 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponse createBooking(BookingCreateRequest request, String currentUserPhone) {
+        if(request.startDate().isAfter(request.endDate())){
+            throw new AppException(ErrorCode.BOOKING_INVALID_DATE_RANGE);
+        }
         User user = userRepository.findByPhone(currentUserPhone)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Car car = carRepository.findById(request.carId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy xe"));
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND, request.carId()));
 
         List<Booking> overlapping = bookingRepository.findOverlappingBookings(
                 car.getCarId(),
@@ -47,14 +48,11 @@ public class BookingServiceImpl implements BookingService {
 
         if (!overlapping.isEmpty()) {
             Booking conflict = overlapping.get(0);
-            throw new BookingConflictException(
-                    "Xe đã được đặt từ " + conflict.getStartDate() +
-                            " đến " + conflict.getEndDate() + ". Vui lòng chọn khoảng thời gian khác."
+            throw new AppException(
+                    ErrorCode.BOOKING_DATE_CONFLICT,
+                    conflict.getStartDate(),
+                    conflict.getEndDate()
             );
-        }
-
-        if (request.startDate().isAfter(request.endDate())) {
-            throw new IllegalArgumentException("Ngày bắt đầu phải trước hoặc bằng ngày kết thúc");
         }
 
         long days = request.startDate().until(request.endDate()).getDays() + 1;
@@ -88,13 +86,59 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingSummaryResponse> getMyBookings(String currentUserPhone) {
         User user = userRepository.findByPhone(currentUserPhone)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         List<Booking> bookings = bookingRepository.findByUserUserId(user.getUserId());
 
         return bookings.stream()
                 .map(this::mapToSummary)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public BookingResponse getBookingById(Long bookingId, String currentUserPhone, boolean isAdmin) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND, bookingId));
+
+        if (!isAdmin) {
+            User currentUser = userRepository.findByPhone(currentUserPhone)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+            if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
+                throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
+            }
+        }
+
+        return mapToResponse(booking);
+    }
+
+    @Override
+    @Transactional
+    public BookingResponse cancelBooking(Long bookingId, String currentUserPhone, boolean isAdmin) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_FOUND, bookingId));
+
+        if(!isAdmin) {
+            User currentUser = userRepository.findByPhone(currentUserPhone)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND, bookingId));
+
+            if(!booking.getUser().getUserId().equals(currentUser.getUserId())) {
+                throw new AppException(ErrorCode.BOOKING_ACCESS_DENIED);
+            }
+
+            if(booking.getStatus() != BookingStatus.PENDING) {
+                throw new AppException(ErrorCode.BOOKING_CANCEL_NOT_ALLOWED, booking.getStatus());
+            }
+        }
+
+        if(booking.getStatus() == BookingStatus.CANCELLED) {
+            throw new AppException(ErrorCode.BOOKING_INVALID_STATUS_TRANSITION, BookingStatus.CANCELLED, BookingStatus.COMPLETED);
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        booking = bookingRepository.save(booking);
+
+        return mapToResponse(booking);
     }
 
     private BookingResponse mapToResponse(Booking booking) {
@@ -128,55 +172,5 @@ public class BookingServiceImpl implements BookingService {
                 booking.getTotalPrice(),
                 booking.getStatus()
         );
-    }
-
-    @Override
-    public BookingResponse getBookingById(Long bookingId, String currentUserPhone, boolean isAdmin) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException(bookingId));
-
-        if (!isAdmin) {
-            User currentUser = userRepository.findByPhone(currentUserPhone)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-
-            if (!booking.getUser().getUserId().equals(currentUser.getUserId())) {
-                throw new IllegalArgumentException("Bạn không có quyền xem booking này");
-            }
-        }
-
-        return mapToResponse(booking);
-    }
-
-    @Override
-    @Transactional
-    public BookingResponse cancelBooking(Long bookingId, String currentUserPhone, boolean isAdmin) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new BookingNotFoundException(bookingId));
-
-        if(!isAdmin) {
-            User currentUser = userRepository.findByPhone(currentUserPhone)
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
-
-            if(!booking.getUser().getUserId().equals(currentUser.getUserId())) {
-                throw new IllegalArgumentException("Bạn không có quyền huỷ booking này");
-            }
-
-            if(booking.getStatus() != BookingStatus.PENDING) {
-                throw new InvalidBookingStatusException(
-                        booking.getStatus(),
-                        BookingStatus.CANCELLED,
-                        "USER chỉ có thể hủy booking khi trạng thái là PENDING"
-                );
-            }
-        }
-
-        if(booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new InvalidBookingStatusException("Không thể huỷ booking đã hoàn tất");
-        }
-
-        booking.setStatus(BookingStatus.CANCELLED);
-        booking = bookingRepository.save(booking);
-
-        return mapToResponse(booking);
     }
 }

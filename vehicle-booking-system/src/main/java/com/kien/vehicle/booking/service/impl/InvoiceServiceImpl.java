@@ -2,9 +2,7 @@ package com.kien.vehicle.booking.service.impl;
 
 import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceSummaryResponse;
-import com.kien.vehicle.booking.exception.InvalidBookingStatusException;
-import com.kien.vehicle.booking.exception.InvoiceAlreadyExistsException;
-import com.kien.vehicle.booking.exception.InvoiceNotFoundException;
+import com.kien.vehicle.booking.exception.*;
 import com.kien.vehicle.booking.model.Booking;
 import com.kien.vehicle.booking.model.BookingStatus;
 import com.kien.vehicle.booking.model.Invoice;
@@ -31,7 +29,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional
     public InvoiceResponse createInvoiceForBooking(Booking booking){
         if(invoiceRepository.existsByBookingBookingId(booking.getBookingId())) {
-            throw new InvoiceAlreadyExistsException(booking.getBookingId());
+            throw new AppException(ErrorCode.INVOICE_ALREADY_EXISTS, booking.getBookingId());
         }
 
         String invoiceNumber = generateInvoiceNumber();
@@ -58,18 +56,18 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     public List<InvoiceSummaryResponse> getMyInvoices(String currentUserPhone) {
-        Long userId = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thây người dùng")).getUserId();
+        Long userId = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)).getUserId();
         List<Invoice> invoices = invoiceRepository.findByBookingUserUserId(userId);
         return invoices.stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 
     @Override
     public InvoiceResponse getInvoiceById(Long invoiceId, String currentUserPhone, boolean isAdmin) {
-        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException(invoiceId));
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new AppException(ErrorCode.INVOICE_NOT_FOUND, invoiceId));
         if(!isAdmin) {
-            Long userId = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng")).getUserId();
+            Long userId = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)).getUserId();
             if(!invoice.getBooking().getUser().getUserId().equals(userId)){
-                throw new IllegalArgumentException("Bạn không có quyền xem hoá đơn này");
+                throw new AppException(ErrorCode.INVOICE_ACCESS_DENIED);
             }
         }
         return mapToResponse(invoice);

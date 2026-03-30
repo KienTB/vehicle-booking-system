@@ -4,6 +4,8 @@ import com.kien.vehicle.booking.dto.request.LoginRequest;
 import com.kien.vehicle.booking.dto.request.RefreshTokenRequest;
 import com.kien.vehicle.booking.dto.request.RegisterRequest;
 import com.kien.vehicle.booking.dto.response.AuthenticationResponse;
+import com.kien.vehicle.booking.exception.AppException;
+import com.kien.vehicle.booking.exception.ErrorCode;
 import com.kien.vehicle.booking.model.RefreshToken;
 import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.RefreshTokenRepository;
@@ -45,13 +47,9 @@ public class AuthService {
     private RefreshTokenService refreshTokenService;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        Optional<User> existingUser = userRepository.findByPhone(request.phone());
-        if (existingUser.isPresent()) {
-            logger.warn("Phone number already exists: {}", request.phone());
-            throw new IllegalArgumentException("Số điện thoại đã tồn tại");
+        if (userRepository.findByPhone(request.phone()).isPresent()) {
+            throw new AppException(ErrorCode.AUTH_PHONE_ALREADY_EXISTS, request.phone());
         }
-
-        // Optional: check email nếu muốn unique
 
         User user = new User();
         user.setName(request.name());
@@ -85,14 +83,16 @@ public class AuthService {
             );
         } catch (BadCredentialsException e) {
             logger.warn("Invalid credentials for phone: {}", request.phone());
-            throw new BadCredentialsException("Số điện thoại hoặc mật khẩu không đúng");
+            throw new AppException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
-        User user = userRepository.findByPhone(request.phone()).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        User user = userRepository.findByPhone(request.phone()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.phone());
         String accessToken = jwtService.generateToken(userDetails);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        logger.info("User logged in: {}", user.getPhone());
 
         return new AuthenticationResponse(
                 accessToken,
@@ -123,9 +123,9 @@ public class AuthService {
         );
     }
 
-    public void logout(String currrentUserPhone){
-        User user = userRepository.findByPhone(currrentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+    public void logout(String currentUserPhone){
+        User user = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         refreshTokenService.deleteByUserId(user.getUserId());
-        logger.info("User logged out: {}", currrentUserPhone);
+        logger.info("User logged out: {}", currentUserPhone);
     }
 }

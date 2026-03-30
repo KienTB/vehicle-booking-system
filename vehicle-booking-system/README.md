@@ -291,16 +291,6 @@ VNPAY         → placeholder tích hợp sau
    → Booking:  CANCELLED
    → Car:      AVAILABLE
 
-7. Access Token hết hạn trong quá trình sử dụng
-   POST /api/auth/refresh { "refreshToken": "..." }
-   → Rotate: xóa token cũ, cấp token mới
-   → Tiếp tục dùng bình thường, user không cần làm gì
-
-8. USER đăng xuất
-   POST /api/auth/logout
-   → Refresh Token bị xóa khỏi DB
-   → Không thể xin Access Token mới
-   → Access Token tự hết hạn sau 15 phút
 ```
 
 ---

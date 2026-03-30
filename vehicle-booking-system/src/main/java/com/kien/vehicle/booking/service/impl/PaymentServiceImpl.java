@@ -1,6 +1,5 @@
 package com.kien.vehicle.booking.service.impl;
 
-import com.kien.vehicle.booking.dto.request.PaymentRequest;
 import com.kien.vehicle.booking.dto.response.PaymentResponse;
 import com.kien.vehicle.booking.dto.response.PaymentSummaryResponse;
 import com.kien.vehicle.booking.exception.*;
@@ -8,11 +7,9 @@ import com.kien.vehicle.booking.model.*;
 import com.kien.vehicle.booking.repository.*;
 import com.kien.vehicle.booking.service.PaymentService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.parameters.P;
+import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.awt.print.Book;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,19 +25,19 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public List<PaymentSummaryResponse> getMyPayments(String currentUserPhone) {
-        User curentUser = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        User curentUser = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         List<Payment> payments = paymentRepository.findByUserId(curentUser.getUserId());
         return payments.stream().map(this::mapToSummary).collect(Collectors.toList());
     }
 
     @Override
     public PaymentResponse getPaymentById(Long paymentId, String currentUserPhone, boolean isAdmin) {
-        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new PaymentNotFoundException(paymentId));
+        Payment payment = paymentRepository.findById(paymentId).orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND, paymentId));
         if(!isAdmin){
-            User currentUser = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+            User currentUser = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             Long ownerUserId = payment.getInvoice().getBooking().getUser().getUserId();
             if(!ownerUserId.equals(currentUser.getUserId())){
-                throw new PaymentNotAllowedException("Bạn không có quyền xem payment này");
+                throw new AppException(ErrorCode.PAYMENT_ACCESS_DENIED);
             }
         }
         return mapToResponse(payment);
@@ -50,17 +47,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponse confirmPayment(Long invoiceId, PaymentStatus result) {
         if(result != PaymentStatus.SUCCESS && result != PaymentStatus.FAILED){
-            throw new InvalidPaymentStatusException("Kết quả xác nhận chỉ được là SUCCESS hoặc FAILED");
+            throw new AppException(ErrorCode.PAYMENT_INVALID_RESULT);
         }
 
-        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new InvoiceNotFoundException(invoiceId));
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow(() -> new AppException(ErrorCode.INVOICE_NOT_FOUND));
 
         if(invoice.getStatus() != InvoiceStatus.UNPAID){
-            throw new InvalidInvoiceStatusException("Hoá đơn ở trạng thái UNPAID mới có thể xác nhận thanh toán. " + "Trạng thái hiện tại: " + invoice.getStatus());
+            throw new AppException(ErrorCode.INVOICE_INVALID_STATUS, invoice.getStatus());
         }
 
         if(paymentRepository.existsByInvoiceId(invoiceId)){
-            throw new PaymentAlreadyExistsException(invoiceId);
+            throw new AppException(ErrorCode.INVOICE_ALREADY_EXISTS, invoiceId);
         }
 
         Booking booking = invoice.getBooking();
@@ -71,7 +68,6 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setAmount(invoice.getTotalAmount());
         payment.setPaymentStatus(result);
         payment.setPaymentMethod(PaymentMethod.BANK_TRANSFER);
-
         paymentRepository.save(payment);
 
         if(result == PaymentStatus.SUCCESS){

@@ -5,8 +5,8 @@ import com.kien.vehicle.booking.dto.request.CarUpdateRequest;
 import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
-import com.kien.vehicle.booking.exception.CarNotFoundException;
-import com.kien.vehicle.booking.exception.LicensePlateAlreadyExistsException;
+import com.kien.vehicle.booking.exception.AppException;
+import com.kien.vehicle.booking.exception.ErrorCode;
 import com.kien.vehicle.booking.model.Booking;
 import com.kien.vehicle.booking.model.BookingStatus;
 import com.kien.vehicle.booking.model.Car;
@@ -35,7 +35,7 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public CarResponse createCar(CarCreateRequest request) {
         if (carRepository.existsByLicensePlate(request.licensePlate())) {
-            throw new LicensePlateAlreadyExistsException("Biển số xe đã tồn tại: " + request.licensePlate());
+            throw new AppException(ErrorCode.CAR_LICENSE_PLATE_EXISTS, request.licensePlate());
         }
 
         Car car = new Car();
@@ -59,11 +59,11 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public CarResponse updateCar(Long id, CarUpdateRequest request) {
         Car car = carRepository.findById(id)
-                .orElseThrow(() -> new CarNotFoundException("Không tìm thấy xe với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND,id));
 
         if (request.licensePlate() != null && !request.licensePlate().equals(car.getLicensePlate())) {
             if (carRepository.existsByLicensePlate(request.licensePlate())) {
-                throw new LicensePlateAlreadyExistsException("Biển số xe đã tồn tại: " + request.licensePlate());
+                throw new AppException(ErrorCode.CAR_LICENSE_PLATE_EXISTS, request.licensePlate());
             }
             car.setLicensePlate(request.licensePlate());
         }
@@ -87,9 +87,8 @@ public class CarServiceImpl implements CarService {
     @Transactional
     public void deleteCar(Long id) {
         Car car = carRepository.findById(id)
-                .orElseThrow(() -> new CarNotFoundException("Không tìm thấy xe với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND, id));
 
-        // Soft delete: chuyển status thành DISABLED
         car.setStatus(CarStatus.DISABLED);
         carRepository.save(car);
     }
@@ -97,7 +96,7 @@ public class CarServiceImpl implements CarService {
     @Override
     public CarResponse getCarById(Long id) {
         Car car = carRepository.findById(id)
-                .orElseThrow(() -> new CarNotFoundException("Không tìm thấy xe với ID: " + id));
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND, id));
         return mapToResponse(car);
     }
 
@@ -128,7 +127,7 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public CarAvailabilityResponse getCarAvailability(Long carId) {
-        Car car = carRepository.findById(carId).orElseThrow(() -> new CarNotFoundException("Không tìm thấy xe ID: " + carId));
+        Car car = carRepository.findById(carId).orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND, carId));
         LocalDate today = LocalDate.now();
         List<Booking> acticeBookings = bookingRepository.findActiveBookingsByCarId(carId, today, List.of(BookingStatus.PENDING, BookingStatus.COMPLETED));
         List<LocalDate> bookedDates = acticeBookings.stream()

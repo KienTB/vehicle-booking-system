@@ -1,6 +1,7 @@
 package com.kien.vehicle.booking.service;
 
-import com.kien.vehicle.booking.exception.RefreshTokenException;
+import com.kien.vehicle.booking.exception.AppException;
+import com.kien.vehicle.booking.exception.ErrorCode;
 import com.kien.vehicle.booking.model.RefreshToken;
 import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.RefreshTokenRepository;
@@ -32,10 +33,10 @@ public class RefreshTokenService {
 
     @Transactional
     public RefreshToken rotateRefreshToken(String token){
-        RefreshToken refreshToken = refreshTokenRepository.findByToken(token).orElseThrow(() -> new RefreshTokenException("Refresh token không hợp lệ"));
+        RefreshToken refreshToken = refreshTokenRepository.findByToken(token).orElseThrow(() -> new AppException(ErrorCode.AUTH_REFRESH_TOKEN_INVALID));
         if(refreshToken.isExpired()){
             refreshTokenRepository.delete(refreshToken);
-            throw new RefreshTokenException("Refresh token đã hết hạn. Vui lòng đăng nhập lại");
+            throw new AppException(ErrorCode.AUTH_REFRESH_TOKEN_EXPIRED);
         }
         User user = refreshToken.getUser();
         refreshTokenRepository.delete(refreshToken);
