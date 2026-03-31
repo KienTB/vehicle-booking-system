@@ -3,9 +3,12 @@ package com.kien.vehicle.booking.controller.admin;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceSummaryResponse;
+import com.kien.vehicle.booking.dto.response.PageResponse;
 import com.kien.vehicle.booking.model.InvoiceStatus;
 import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,9 +25,19 @@ import java.util.List;
 public class AdminInvoiceController {
     private final InvoiceService invoiceService;
     @GetMapping
-    public ResponseEntity<ApiResponse<List<InvoiceSummaryResponse>>> getAllInvoices(@RequestParam(required = false) InvoiceStatus invoiceStatus) {
-        List<InvoiceSummaryResponse> invoices = invoiceService.getAllInvoices(invoiceStatus);
-        String message = invoiceStatus != null ? "Lấy danh sách hoá đơn theo trạng thái " + invoices + " thành công" : "Lấy danh sách tất cả hoá đơn thành công";
-        return ResponseEntity.ok(new ApiResponse<>(true, message, invoices));
+    public ResponseEntity<ApiResponse<PageResponse<InvoiceSummaryResponse>>> getAllInvoices(
+            @RequestParam(required = false)    InvoiceStatus invoiceStatus,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, Math.min(size, 50));
+
+        String message = invoiceStatus != null
+                ? "Lấy danh sách hoá đơn theo trạng thái " + invoiceStatus + " thành công"
+                : "Lấy danh sách tất cả hoá đơn thành công";
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, message,
+                PageResponse.of(invoiceService.getAllInvoices(invoiceStatus, pageable))));
     }
 }

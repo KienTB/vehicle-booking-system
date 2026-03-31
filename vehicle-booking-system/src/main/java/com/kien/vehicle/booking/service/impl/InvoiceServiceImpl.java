@@ -11,6 +11,8 @@ import com.kien.vehicle.booking.repository.InvoiceRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
 import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,10 +58,9 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceSummaryResponse> getMyInvoices(String currentUserPhone) {
+    public Page<InvoiceSummaryResponse> getMyInvoices(String currentUserPhone, Pageable pageable) {
         Long userId = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND)).getUserId();
-        List<Invoice> invoices = invoiceRepository.findByBookingUserUserId(userId);
-        return invoices.stream().map(this::mapToSummary).collect(Collectors.toList());
+        return invoiceRepository.findByBookingUserUserId(userId, pageable).map(this::mapToSummary);
     }
 
     @Override
@@ -75,14 +76,11 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public List<InvoiceSummaryResponse> getAllInvoices(InvoiceStatus invoiceStatus) {
-        List<Invoice> invoices;
-        if(invoiceStatus != null){
-            invoices = invoiceRepository.findByStatus(invoiceStatus);
-        } else {
-            invoices = invoiceRepository.findAll();
+    public Page<InvoiceSummaryResponse> getAllInvoices(InvoiceStatus invoiceStatus, Pageable pageable) {
+        if (invoiceStatus != null) {
+            return invoiceRepository.findByStatus(invoiceStatus, pageable).map(this::mapToSummary);
         }
-        return invoices.stream().map(this::mapToSummary).collect(Collectors.toList());
+        return invoiceRepository.findAll(pageable).map(this::mapToSummary);
     }
 
     private InvoiceResponse mapToResponse(Invoice invoice) {

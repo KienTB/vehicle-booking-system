@@ -15,6 +15,8 @@ import com.kien.vehicle.booking.repository.BookingRepository;
 import com.kien.vehicle.booking.repository.CarRepository;
 import com.kien.vehicle.booking.service.CarService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -101,28 +103,20 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public List<CarSummaryResponse> getAllCars(boolean onlyAvailable) {
-        List<Car> cars;
+    public Page<CarSummaryResponse> getAllCars(boolean onlyAvailable, Pageable pageable) {
         if (onlyAvailable) {
-            cars = carRepository.findByStatus(CarStatus.AVAILABLE);
+            return carRepository.findByStatus(CarStatus.AVAILABLE, pageable)
+                    .map(this::mapToSummary);
         } else {
-            cars = carRepository.findAll();
+            return carRepository.findAll(pageable)
+                    .map(this::mapToSummary);
         }
-        return cars.stream()
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
     }
 
     @Override
-    public List<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status) {
-        List<Car> cars = carRepository.findAll();
-        return cars.stream()
-                .filter(car -> (brand == null || car.getBrand().toLowerCase().contains(brand.toLowerCase())))
-                .filter(car -> (minPrice == null || car.getPricePerDay().compareTo(minPrice) >= 0))
-                .filter(car -> (maxPrice == null || car.getPricePerDay().compareTo(maxPrice) <= 0))
-                .filter(car -> (status == null || car.getStatus() == status))
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
+    public Page<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status, Pageable pageable) {
+        return carRepository.findWithFilters(brand, minPrice, maxPrice, status, false, pageable)
+                .map(this::mapToSummary);
     }
 
     @Override

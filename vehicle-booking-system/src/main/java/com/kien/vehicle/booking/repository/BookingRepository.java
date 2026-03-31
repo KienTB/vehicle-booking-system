@@ -2,6 +2,8 @@ package com.kien.vehicle.booking.repository;
 
 import com.kien.vehicle.booking.model.Booking;
 import com.kien.vehicle.booking.model.BookingStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,7 +29,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("endDate") LocalDate endDate
     );
 
-    List<Booking> findByUserUserId(Long userId);
+    Page<Booking> findByUserUserId(Long userId, Pageable pageable);
 
     List<Booking> findByUserUserIdAndStatus(Long userId, BookingStatus status);
 

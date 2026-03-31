@@ -12,6 +12,8 @@ import com.kien.vehicle.booking.repository.UserRepository;
 import com.kien.vehicle.booking.service.BookingService;
 import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,23 +75,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingSummaryResponse> getAllBookings() {
-        List<Booking> bookings = bookingRepository.findAll();
-        return bookings.stream()
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
+    public Page<BookingSummaryResponse> getAllBookings(Pageable pageable) {
+        return bookingRepository.findAll(pageable).map(this::mapToSummary);
     }
 
     @Override
-    public List<BookingSummaryResponse> getMyBookings(String currentUserPhone) {
+    public Page<BookingSummaryResponse> getMyBookings(String currentUserPhone, Pageable pageable) {
         User user = userRepository.findByPhone(currentUserPhone)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        List<Booking> bookings = bookingRepository.findByUserUserId(user.getUserId());
-
-        return bookings.stream()
-                .map(this::mapToSummary)
-                .collect(Collectors.toList());
+        return bookingRepository.findByUserUserId(user.getUserId(), pageable).map(this::mapToSummary);
     }
 
     @Override

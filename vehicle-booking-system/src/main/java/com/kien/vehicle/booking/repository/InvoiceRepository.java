@@ -2,6 +2,8 @@ package com.kien.vehicle.booking.repository;
 
 import com.kien.vehicle.booking.model.Invoice;
 import com.kien.vehicle.booking.model.InvoiceStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +15,8 @@ import java.util.Optional;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<Invoice> findByBookingBookingId(Long bookingId);
-    List<Invoice> findByBookingUserUserId(Long userId);
-    List<Invoice> findByStatus(InvoiceStatus status);
+    Page<Invoice> findByBookingUserUserId(Long userId, Pageable pageable);
+    Page<Invoice> findByStatus(InvoiceStatus status, Pageable pageable);
     @Query(value = """
     SELECT MAX(i.invoice_number) FROM invoice i WHERE i.invoice_number LIKE CONCAT (:prefix, '%') """, nativeQuery = true)
     Optional<String> findMaxInvoiceNumberByPrefix(@Param("prefix") String prefix);

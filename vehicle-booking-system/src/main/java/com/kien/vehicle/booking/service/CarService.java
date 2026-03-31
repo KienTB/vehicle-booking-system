@@ -6,6 +6,8 @@ import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
 import com.kien.vehicle.booking.model.CarStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,9 +22,9 @@ public interface CarService {
 
     CarResponse getCarById(Long id);
 
-    List<CarSummaryResponse> getAllCars(boolean onlyAvailable);
+    Page<CarSummaryResponse> getAllCars(boolean onlyAvailable, Pageable pageable);
 
-    List<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status);
+    Page<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status, Pageable pageable);
 
     CarAvailabilityResponse getCarAvailability(Long carId);
 }

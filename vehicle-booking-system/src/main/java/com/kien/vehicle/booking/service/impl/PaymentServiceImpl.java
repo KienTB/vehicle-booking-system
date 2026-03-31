@@ -7,6 +7,8 @@ import com.kien.vehicle.booking.model.*;
 import com.kien.vehicle.booking.repository.*;
 import com.kien.vehicle.booking.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.expression.ExpressionException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +26,10 @@ public class PaymentServiceImpl implements PaymentService {
     private final CarRepository carRepository;
 
     @Override
-    public List<PaymentSummaryResponse> getMyPayments(String currentUserPhone) {
-        User curentUser = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        List<Payment> payments = paymentRepository.findByUserId(curentUser.getUserId());
-        return payments.stream().map(this::mapToSummary).collect(Collectors.toList());
+    public Page<PaymentSummaryResponse> getMyPayments(String currentUserPhone, Pageable pageable) {
+        User currentUser = userRepository.findByPhone(currentUserPhone)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return paymentRepository.findByUserId(currentUser.getUserId(), pageable).map(this::mapToSummary);
     }
 
     @Override
@@ -87,14 +89,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public List<PaymentSummaryResponse> getAllPayments(PaymentStatus paymentStatus) {
-        List<Payment> payments;
+    public Page<PaymentSummaryResponse> getAllPayments(PaymentStatus paymentStatus, Pageable pageable) {
         if (paymentStatus != null) {
-            payments = paymentRepository.findByPaymentStatus(paymentStatus);
-        } else {
-            payments = paymentRepository.findAll();
+            return paymentRepository.findByPaymentStatus(paymentStatus, pageable)
+                    .map(this::mapToSummary);
         }
-        return payments.stream().map(this::mapToSummary).collect(Collectors.toList());
+        return paymentRepository.findAll(pageable)
+                .map(this::mapToSummary);
     }
 
     private PaymentResponse mapToResponse(Payment payment){

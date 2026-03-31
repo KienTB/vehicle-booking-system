@@ -3,15 +3,15 @@ package com.kien.vehicle.booking.controller;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceSummaryResponse;
+import com.kien.vehicle.booking.dto.response.PageResponse;
 import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,10 +23,17 @@ public class InvoiceController {
     private final InvoiceService invoiceService;
 
     @GetMapping("/my-invoices")
-    public ResponseEntity<ApiResponse<List<InvoiceSummaryResponse>>> getMyInvoices(Authentication authentication) {
-        String currentUserPhone = authentication.getName();
-        List<InvoiceSummaryResponse> invoices = invoiceService.getMyInvoices(currentUserPhone);
-        return ResponseEntity.ok(new ApiResponse<>(true, "Lấy danh sách hoá đơn của bạn thành công", invoices));
+    public ResponseEntity<ApiResponse<PageResponse<InvoiceSummaryResponse>>> getMyInvoices(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
+
+        Pageable pageable = PageRequest.of(page, Math.min(size, 50));
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Lấy danh sách hoá đơn của bạn thành công",
+                PageResponse.of(invoiceService.getMyInvoices(authentication.getName(), pageable))));
     }
 
     @GetMapping("{id}")

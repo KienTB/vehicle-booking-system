@@ -1,16 +1,17 @@
 package com.kien.vehicle.booking.controller.admin;
 
 import com.kien.vehicle.booking.dto.response.ApiResponse;
+import com.kien.vehicle.booking.dto.response.PageResponse;
 import com.kien.vehicle.booking.dto.response.PaymentResponse;
 import com.kien.vehicle.booking.dto.response.PaymentSummaryResponse;
 import com.kien.vehicle.booking.model.PaymentStatus;
 import com.kien.vehicle.booking.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/payments")
@@ -19,10 +20,20 @@ import java.util.List;
 public class AdminPaymentController {
     private final PaymentService paymentService;
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PaymentSummaryResponse>>> getAllPayments(@RequestParam(required = false) PaymentStatus paymentStatus) {
-        List<PaymentSummaryResponse> payments = paymentService.getAllPayments(paymentStatus);
-        String message = paymentStatus != null ? "Lấy danh sách payment theo trạng thái " + paymentStatus + " thành công" : "Lấy danh sách tất cả payment thành công";
-        return ResponseEntity.ok(new ApiResponse<>(true, message, payments));
+    public ResponseEntity<ApiResponse<PageResponse<PaymentSummaryResponse>>> getAllPayments(
+            @RequestParam(required = false)    PaymentStatus paymentStatus,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, Math.min(size, 50));
+
+        String message = paymentStatus != null
+                ? "Lấy danh sách payment theo trạng thái " + paymentStatus + " thành công"
+                : "Lấy danh sách tất cả payment thành công";
+
+        return ResponseEntity.ok(new ApiResponse<>(
+                true, message,
+                PageResponse.of(paymentService.getAllPayments(paymentStatus, pageable))));
     }
 
     @PutMapping("/confirm/{invoiceId}")

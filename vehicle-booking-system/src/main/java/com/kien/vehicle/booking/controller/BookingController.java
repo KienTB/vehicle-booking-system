@@ -4,9 +4,12 @@ import com.kien.vehicle.booking.dto.request.BookingCreateRequest;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.BookingResponse;
 import com.kien.vehicle.booking.dto.response.BookingSummaryResponse;
+import com.kien.vehicle.booking.dto.response.PageResponse;
 import com.kien.vehicle.booking.service.BookingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,16 +40,17 @@ public class BookingController {
     }
 
     @GetMapping("/my-bookings")
-    public ResponseEntity<ApiResponse<List<BookingSummaryResponse>>> getMyBookings(
+    public ResponseEntity<ApiResponse<PageResponse<BookingSummaryResponse>>> getMyBookings(
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "10") int size,
             Authentication authentication) {
 
-        String currentUserPhone = authentication.getName();
+        Pageable pageable = PageRequest.of(page, Math.min(size, 50));
 
-        List<BookingSummaryResponse> bookings = bookingService.getMyBookings(currentUserPhone);
-
-        return ResponseEntity.ok(
-                new ApiResponse<>(true, "Lấy danh sách booking của bạn thành công", bookings)
-        );
+        return ResponseEntity.ok(new ApiResponse<>(
+                true,
+                "Lấy danh sách booking của bạn thành công",
+                PageResponse.of(bookingService.getMyBookings(authentication.getName(), pageable))));
     }
 
     @GetMapping("/{id}")
