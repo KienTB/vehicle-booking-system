@@ -257,6 +257,41 @@ VNPAY         → placeholder tích hợp sau
 
 ---
 
+## 📄 Pagination
+
+Tất cả các endpoint GET list đều hỗ trợ phân trang.
+
+### Query params
+
+| Param | Mặc định | Giới hạn | Mô tả |
+|-------|----------|----------|-------|
+| `page` | `0` | — | Số trang, bắt đầu từ 0 |
+| `size` | `10` | tối đa `50` | Số bản ghi mỗi trang |
+
+| Field | Mô tả |
+|-------|-------|
+| `content` | Danh sách bản ghi trong trang hiện tại |
+| `pageNumber` | Số trang hiện tại (bắt đầu từ 0) |
+| `pageSize` | Số bản ghi mỗi trang |
+| `totalElements` | Tổng số bản ghi trong DB |
+| `totalPages` | Tổng số trang |
+| `first` | `true` nếu đây là trang đầu |
+| `last` | `true` nếu đây là trang cuối |
+
+### Các endpoint hỗ trợ pagination
+
+| Endpoint | Role |
+|----------|------|
+| `GET /api/cars` | Public |
+| `GET /api/bookings/my-bookings` | USER |
+| `GET /api/invoices/my-invoices` | USER |
+| `GET /api/payments/my-payments` | USER |
+| `GET /api/admin/bookings` | ADMIN |
+| `GET /api/admin/invoices` | ADMIN |
+| `GET /api/admin/payments` | ADMIN |
+
+---
+
 ## 🚀 Business Flow hoàn chỉnh
 
 ```
