@@ -63,8 +63,31 @@ public enum ErrorCode {
             "Không tìm thấy người dùng.",
             HttpStatus.NOT_FOUND
     ),
-
-    // ─── CAR ──────────────────────────────────────────────────────────────
+    PASSWORD_MISMATCH(
+            "PASSWORD_MISMATCH",
+            "Mật khẩu mới và xác nhận không khớp.",
+            HttpStatus.BAD_REQUEST
+    ),
+    PASSWORD_WRONG_OLD(
+            "PASSWORD_WRONG_OLD",
+            "Mật khẩu cũ không đúng.",
+            HttpStatus.BAD_REQUEST
+    ),
+    PASSWORD_RESET_OTP_INVALID(
+            "PASSWORD_RESET_OTP_INVALID",
+            "Mã OTP không hợp lệ.",
+            HttpStatus.BAD_REQUEST
+    ),
+    PASSWORD_RESET_OTP_EXPIRED(
+            "PASSWORD_RESET_OTP_EXPIRED",
+            "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.",
+            HttpStatus.BAD_REQUEST
+    ),
+    PASSWORD_RESET_OTP_USED(
+            "PASSWORD_RESET_OTP_USED",
+            "Mã OTP đã được sử dụng.",
+            HttpStatus.BAD_REQUEST
+    ),
     CAR_NOT_FOUND(
             "CAR_NOT_FOUND",
             "Không tìm thấy xe với ID: %s",
@@ -75,8 +98,6 @@ public enum ErrorCode {
             "Biển số xe '%s' đã tồn tại.",
             HttpStatus.CONFLICT
     ),
-
-    // ─── BOOKING ──────────────────────────────────────────────────────────
     BOOKING_NOT_FOUND(
             "BOOKING_NOT_FOUND",
             "Không tìm thấy booking với ID: %s",
@@ -107,8 +128,6 @@ public enum ErrorCode {
             "Bạn không có quyền truy cập booking này.",
             HttpStatus.FORBIDDEN
     ),
-
-    // ─── INVOICE ──────────────────────────────────────────────────────────
     INVOICE_NOT_FOUND(
             "INVOICE_NOT_FOUND",
             "Không tìm thấy hóa đơn với ID: %s",
@@ -129,8 +148,6 @@ public enum ErrorCode {
             "Bạn không có quyền xem hóa đơn này.",
             HttpStatus.FORBIDDEN
     ),
-
-    // ─── PAYMENT ──────────────────────────────────────────────────────────
     PAYMENT_NOT_FOUND(
             "PAYMENT_NOT_FOUND",
             "Không tìm thấy payment với ID: %s",

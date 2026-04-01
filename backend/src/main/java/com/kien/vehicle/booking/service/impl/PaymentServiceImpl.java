@@ -5,6 +5,7 @@ import com.kien.vehicle.booking.dto.response.PaymentSummaryResponse;
 import com.kien.vehicle.booking.exception.*;
 import com.kien.vehicle.booking.model.*;
 import com.kien.vehicle.booking.repository.*;
+import com.kien.vehicle.booking.service.EmailService;
 import com.kien.vehicle.booking.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CarRepository carRepository;
+    private final EmailService emailService;
 
     @Override
     public Page<PaymentSummaryResponse> getMyPayments(String currentUserPhone, Pageable pageable) {
@@ -84,6 +86,8 @@ public class PaymentServiceImpl implements PaymentService {
         invoiceRepository.save(invoice);
         bookingRepository.save(booking);
         carRepository.save(car);
+
+        emailService.sendPaymentConfirmation(payment);
 
         return mapToResponse(payment);
     }

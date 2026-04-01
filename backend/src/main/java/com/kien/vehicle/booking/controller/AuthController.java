@@ -1,18 +1,14 @@
 package com.kien.vehicle.booking.controller;
 
-import com.kien.vehicle.booking.dto.request.LoginRequest;
-import com.kien.vehicle.booking.dto.request.RefreshTokenRequest;
-import com.kien.vehicle.booking.dto.request.RegisterRequest;
+import com.kien.vehicle.booking.dto.request.*;
 import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.AuthenticationResponse;
 import com.kien.vehicle.booking.service.AuthService;
+import com.kien.vehicle.booking.service.PasswordResetService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -20,6 +16,9 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> register(@RequestBody RegisterRequest request) {
@@ -55,4 +54,26 @@ public class AuthController {
         authService.logout(authentication.getName());
         return ResponseEntity.ok(new ApiResponse<>(true, "Đăng xuất thành công", null));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<String>> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        if (request.email() == null || request.email().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse<>(false, "Vui lòng nhập email", null));
+        }
+        passwordResetService.sendOtp(request);
+        return ResponseEntity.ok(new ApiResponse<>(true,
+                "Nếu email tồn tại trong hệ thống, bạn sẽ nhận được mã OTP trong vài giây", null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Đặt lại mật khẩu thành công", null));
+    }
+
+
+
+
+
 }

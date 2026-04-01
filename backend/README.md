@@ -13,6 +13,7 @@ Spring Boot + JWT + MySQL + SwaggerUI.
 - MySQL
 - Spring Security + JWT
 - SpringDoc OpenAPI (Swagger UI)
+- JavaMailSender (Gmail SMTP / Spring Mail)
 - Gradle
 
 ---
@@ -257,6 +258,35 @@ VNPAY         → placeholder tích hợp sau
 
 ---
 
+### Module 9 – Email Notification System
+
+**Mục tiêu:** Gửi email thông báo tự động (hiện tại: OTP đặt lại mật khẩu), không block luồng API chính.
+
+**Endpoints:**
+
+| Method | Endpoint | Role | Mô tả |
+|--------|----------|------|-------|
+| POST | /api/auth/forgot-password | Public | Gửi OTP đặt lại mật khẩu về email |
+| POST | /api/auth/reset-password | Public | Đặt lại mật khẩu bằng OTP |
+
+**Business Rules:**
+- OTP gồm 6 chữ số, sinh ngẫu nhiên bằng `SecureRandom`
+- OTP có hiệu lực trong **1 phút**, sau đó tự động hết hạn
+- Mỗi lần gọi `/forgot-password`, OTP cũ của user bị xóa, OTP mới được tạo
+- OTP chỉ dùng được **1 lần** — sau khi reset thành công, token bị đánh dấu `used = true`
+- Nếu email không tồn tại trong hệ thống → API vẫn trả về 200 OK (bảo vệ thông tin user)
+- Email được gửi **bất đồng bộ** (`@Async`) — không block request, API trả về ngay lập tức
+
+**OTP Status Flow:**
+```
+Mới tạo (used=false, chưa hết hạn)
+    → Dùng 1 lần  → used=true  → PASSWORD_RESET_OTP_USED
+    → Hết 1 phút  → expired()  → PASSWORD_RESET_OTP_EXPIRED
+    → OTP sai     →            → PASSWORD_RESET_OTP_INVALID
+```
+
+---
+
 ## 📄 Pagination
 
 Tất cả các endpoint GET list đều hỗ trợ phân trang.
@@ -326,6 +356,20 @@ Tất cả các endpoint GET list đều hỗ trợ phân trang.
    → Booking:  CANCELLED
    → Car:      AVAILABLE
 
+--- Quên mật khẩu ---
+
+7. USER quên mật khẩu
+   POST /api/auth/forgot-password  { "email": "..." }
+   → Xóa OTP cũ (nếu có)
+   → Tạo OTP mới (6 số, hết hạn sau 1 phút)
+   → Gửi email bất đồng bộ (@Async) → API trả 200 OK ngay
+
+8. USER nhập OTP từ email
+   POST /api/auth/reset-password  { email, otp, newPassword, confirmPassword }
+   → Kiểm tra OTP hợp lệ / chưa dùng / chưa hết hạn
+   → Mã hóa mật khẩu mới (BCrypt), lưu DB
+   → Đánh dấu OTP used=true
+
 ```
 
 ---
@@ -351,6 +395,7 @@ cd vehicle-booking-system
 | Invoice | Hóa đơn thanh toán (1-1 với Booking) |
 | Payment | Lịch sử giao dịch (1-1 với Invoice) |
 | RefreshToken | Refresh Token của user (1-1 với User, lưu DB) |
+| PasswordResetToken | OTP đặt lại mật khẩu (1-1 với User, có TTL 1 phút) |
 
 **Relationships:**
 ```
@@ -359,4 +404,5 @@ Car          1 ──── N  Booking
 Booking      1 ──── 1  Invoice
 Invoice      1 ──── 1  Payment
 User         1 ──── 1  RefreshToken
+User         1 ──── 1  PasswordResetToken
 ```
