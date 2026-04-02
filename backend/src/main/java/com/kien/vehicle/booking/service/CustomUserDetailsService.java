@@ -2,8 +2,7 @@ package com.kien.vehicle.booking.service;
 
 import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,21 +12,20 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+@Slf4j
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-
-    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
 
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
-        logger.debug("Loading user by phone: {}", phone);
+        log.debug("Loading user by phone: {}", phone);
 
         User user = userRepository.findByPhone(phone)
                 .orElseThrow(() -> {
-                    logger.warn("User not found with phone: {}", phone);
+                    log.warn("User not found with phone: {}", phone);
                     return new UsernameNotFoundException("Không tìm thấy người dùng với số điện thoại: " + phone);
                 });
 

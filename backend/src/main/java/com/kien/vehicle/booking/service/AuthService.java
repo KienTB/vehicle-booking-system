@@ -8,10 +8,8 @@ import com.kien.vehicle.booking.exception.AppException;
 import com.kien.vehicle.booking.exception.ErrorCode;
 import com.kien.vehicle.booking.model.RefreshToken;
 import com.kien.vehicle.booking.model.User;
-import com.kien.vehicle.booking.repository.RefreshTokenRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,10 +21,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class AuthService {
-
-    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -60,7 +57,7 @@ public class AuthService {
         user.setRole(request.role() != null && !request.role().isEmpty() ? request.role() : "user");
 
         userRepository.save(user);
-        logger.info("User registered successfully: {}", user.getPhone());
+        log.info("User registered successfully: {}", user.getPhone());
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getPhone());
         String accessToken = jwtService.generateToken(userDetails);
@@ -82,7 +79,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(request.phone(), request.password())
             );
         } catch (BadCredentialsException e) {
-            logger.warn("Invalid credentials for phone: {}", request.phone());
+            log.warn("Invalid credentials for phone: {}", request.phone());
             throw new AppException(ErrorCode.AUTH_INVALID_CREDENTIALS);
         }
 
@@ -92,7 +89,7 @@ public class AuthService {
         String accessToken = jwtService.generateToken(userDetails);
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        logger.info("User logged in: {}", user.getPhone());
+        log.info("User logged in: {}", user.getPhone());
 
         return new AuthenticationResponse(
                 accessToken,
@@ -111,7 +108,7 @@ public class AuthService {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getPhone());
         String newAccessToken = jwtService.generateToken(userDetails);
 
-        logger.info("Token refreshed for user: {}", user.getPhone());
+        log.info("Token refreshed for user: {}", user.getPhone());
 
         return new AuthenticationResponse(
                 newAccessToken,
@@ -126,6 +123,6 @@ public class AuthService {
     public void logout(String currentUserPhone){
         User user = userRepository.findByPhone(currentUserPhone).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         refreshTokenService.deleteByUserId(user.getUserId());
-        logger.info("User logged out: {}", currentUserPhone);
+        log.info("User logged out: {}", currentUserPhone);
     }
 }

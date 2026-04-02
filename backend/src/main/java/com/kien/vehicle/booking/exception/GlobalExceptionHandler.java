@@ -1,8 +1,7 @@
 package com.kien.vehicle.booking.exception;
 
 import com.kien.vehicle.booking.dto.response.ApiResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,18 +14,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex) {
         ErrorCode errorCode = ex.getErrorCode();
         if (errorCode.getHttpStatus().is5xxServerError()) {
-            logger.error("[{}] {}", errorCode.getCode(), ex.getResolvedMessage(), ex);
+            log.error("[{}] {}", errorCode.getCode(), ex.getResolvedMessage(), ex);
         } else {
-            logger.warn("[{}] {}", errorCode.getCode(), ex.getResolvedMessage());
+            log.warn("[{}] {}", errorCode.getCode(), ex.getResolvedMessage());
         }
 
         return ResponseEntity
@@ -44,7 +42,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
 
         String message = ErrorCode.VALIDATION_ERROR.getMessage(errorDetails);
-        logger.warn("[VALIDATION_ERROR] {}", message);
+        log.warn("[VALIDATION_ERROR] {}", message);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
@@ -53,7 +51,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({BadCredentialsException.class, AuthenticationException.class})
     public ResponseEntity<ApiResponse<Void>> handleAuthException(Exception ex) {
-        logger.warn("[AUTH_INVALID_CREDENTIALS] {}", ex.getMessage());
+        log.warn("[AUTH_INVALID_CREDENTIALS] {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(
@@ -64,7 +62,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
-        logger.warn("[AUTH_FORBIDDEN] {}", ex.getMessage());
+        log.warn("[AUTH_FORBIDDEN] {}", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error(
@@ -75,7 +73,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception ex) {
-        logger.error("[COMMON_INTERNAL_ERROR] Unexpected error", ex);
+        log.error("[COMMON_INTERNAL_ERROR] Unexpected error", ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error(

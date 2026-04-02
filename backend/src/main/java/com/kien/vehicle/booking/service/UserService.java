@@ -5,8 +5,7 @@ import com.kien.vehicle.booking.dto.request.UpdateProfileRequest;
 import com.kien.vehicle.booking.dto.response.UserResponse;
 import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -14,10 +13,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class UserService {
-
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -28,33 +26,33 @@ public class UserService {
     public void changePassword(String phone, ChangePasswordRequest request) {
         if (request.newPassword() == null || request.confirmPassword() == null ||
                 !request.newPassword().equals(request.confirmPassword())) {
-            logger.warn("New password and confirm password do not match for phone: {}", phone);
+            log.warn("New password and confirm password do not match for phone: {}", phone);
             throw new IllegalArgumentException("Mật khẩu mới và xác nhận không khớp");
         }
 
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
-            logger.warn("User not found for phone: {}", phone);
+            log.warn("User not found for phone: {}", phone);
             throw new IllegalArgumentException("Không tìm thấy người dùng");
         }
 
         User user = userOpt.get();
 
         if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
-            logger.warn("Old password incorrect for phone: {}", phone);
+            log.warn("Old password incorrect for phone: {}", phone);
             throw new BadCredentialsException("Mật khẩu cũ không đúng");
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
 
-        logger.info("Password changed successfully for phone: {}", phone);
+        log.info("Password changed successfully for phone: {}", phone);
     }
 
     public UserResponse getCurrentUser(String phone) {
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
-            logger.warn("User not found for phone: {}", phone);
+            log.warn("User not found for phone: {}", phone);
             throw new IllegalArgumentException("Không tìm thấy người dùng");
         }
 
@@ -72,7 +70,7 @@ public class UserService {
     public UserResponse updateProfile(String phone, UpdateProfileRequest request) {
         Optional<User> userOpt = userRepository.findByPhone(phone);
         if (userOpt.isEmpty()) {
-            logger.warn("User not found for phone: {}", phone);
+            log.warn("User not found for phone: {}", phone);
             throw new IllegalArgumentException("Không tìm thấy người dùng");
         }
 
@@ -90,7 +88,7 @@ public class UserService {
 
         userRepository.save(user);
 
-        logger.info("Profile updated successfully for phone: {}", phone);
+        log.info("Profile updated successfully for phone: {}", phone);
 
         return new UserResponse(
                 user.getUserId(),

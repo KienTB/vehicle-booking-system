@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.config;
+package com.kien.vehicle.booking.filter;
 
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;

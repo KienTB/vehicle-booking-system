@@ -1,5 +1,8 @@
 package com.kien.vehicle.booking.config;
 
+import com.kien.vehicle.booking.filter.JwtAuthenticationFilter;
+import com.kien.vehicle.booking.filter.MDCLoggingFilter;
+import com.kien.vehicle.booking.filter.RateLimitingFilter;
 import com.kien.vehicle.booking.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +35,9 @@ public class SecurityConfig {
     @Autowired
     private RateLimitingFilter rateLimitingFilter;
 
+    @Autowired
+    private MDCLoggingFilter mdcLoggingFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -52,12 +58,16 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/logout").authenticated()
 
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(mdcLoggingFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

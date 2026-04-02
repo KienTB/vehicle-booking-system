@@ -287,6 +287,21 @@ Mới tạo (used=false, chưa hết hạn)
 
 ---
 
+### Module 10 – Monitoring & Observability
+
+**Mục tiêu:** Giám sát sức khỏe hệ thống và truy vết lỗi tự động qua file log.
+
+**Features:**
+- **Spring Boot Actuator:** Mở các endpoint giám sát nội bộ:
+  - `GET /actuator/health` (Public một phần): Xem trạng thái hoạt động (UP/DOWN) của Máy chủ, Cơ sở dữ liệu và kết nối SMTP.
+  - `GET /actuator/metrics`, `/actuator/loggers` (Chỉ dành cho Role `ADMIN`): Xem thông số hệ thống và thay đổi log-level runtime.
+- **Structured Logging & MDC (Mapped Diagnostic Context):**
+  - Mọi request đều được tự động chèn thêm `X-Request-ID`, `userPhone` và `role` để dễ dàng dò tìm lỗi chéo trên toàn hệ thống.
+  - Profile `dev`: Xuất log dạng chữ có đính kèm metadata có màu.
+  - Profile `prod`: Tự động gói toàn bộ log thành định dạng **JSON** chuẩn (thông qua `logstash-logback-encoder`) để đẩy thẳng lên hệ thống Logstash/Kibana.
+
+---
+
 ## 📄 Pagination
 
 Tất cả các endpoint GET list đều hỗ trợ phân trang.
