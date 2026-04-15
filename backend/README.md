@@ -11,7 +11,6 @@ Spring Boot + JWT + MySQL + Swagger UI.
 - Spring Boot 3.3.5
 - Spring Data JPA (Hibernate)
 - MySQL
-- Spring Security + JWT
 - SpringDoc OpenAPI (Swagger UI)
 - Spring Mail
 - Gradle
