@@ -77,6 +77,7 @@ public class PaymentServiceImpl implements PaymentService {
         if(result == PaymentStatus.SUCCESS){
             invoice.setStatus(InvoiceStatus.PAID);
             booking.setStatus(BookingStatus.COMPLETED);
+            car.setStatus(CarStatus.BOOKED);
         } else {
             invoice.setStatus(InvoiceStatus.FAILED);
             booking.setStatus(BookingStatus.CANCELLED);

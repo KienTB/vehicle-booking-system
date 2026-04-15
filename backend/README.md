@@ -1,11 +1,11 @@
-# 🚗 Vehicle Booking System
+# Vehicle Booking System
 
-RESTful API quản lý đặt xe cho thuê (car rental).  
-Spring Boot + JWT + MySQL + SwaggerUI.
+RESTful API quan ly dat xe cho thue (car rental).
+Spring Boot + JWT + MySQL + Swagger UI.
 
 ---
 
-## 📌 Tech Stack
+## Tech Stack
 
 - Java 21
 - Spring Boot 3.3.5
@@ -13,411 +13,248 @@ Spring Boot + JWT + MySQL + SwaggerUI.
 - MySQL
 - Spring Security + JWT
 - SpringDoc OpenAPI (Swagger UI)
-- JavaMailSender (Gmail SMTP / Spring Mail)
+- Spring Mail
 - Gradle
 
 ---
 
-## 🔐 Security & Roles
+## Security & Roles
 
-- **JWT stateless authentication**
-- **Refresh Token rotation**
-- **Roles**:
-  - `ADMIN`: Quản lý xe, quản lý booking, xác nhận thanh toán, quản lý hóa đơn
-  - `USER`: Đăng ký/đăng nhập, xem xe, đặt xe, xem hóa đơn & payment
-
----
-
-## 📦 Module Overview
+- JWT stateless authentication
+- Refresh token rotation
+- Roles:
+  - `ADMIN`: quan ly xe, booking, xac nhan thanh toan, quan ly hoa don
+  - `USER`: dang ky/dang nhap, xem xe, dat xe, xem hoa don va payment
 
 ---
 
-### Module 2 – Authentication & User
+## Module Overview
 
-**Mục tiêu:** Đăng ký, đăng nhập, quản lý thông tin cá nhân, refresh token.
+### Module 2 - Authentication & User
+
+**Muc tieu:** Dang ky, dang nhap, refresh token, quan ly profile.
 
 **Endpoints:**
 
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| POST | /api/auth/register | Public | Đăng ký tài khoản |
-| POST | /api/auth/login | Public | Đăng nhập, nhận Access Token + Refresh Token |
-| POST | /api/auth/refresh | Public | Xin Access Token mới bằng Refresh Token |
-| POST | /api/auth/logout | USER | Đăng xuất, xóa Refresh Token |
-| GET | /api/user/me | USER | Xem thông tin cá nhân |
-| PUT | /api/user/me | USER | Cập nhật thông tin cá nhân |
-| POST | /api/user/change-password | USER | Đổi mật khẩu |
+| Method | Endpoint | Role |
+|--------|----------|------|
+| POST | /api/auth/register | Public |
+| POST | /api/auth/login | Public |
+| POST | /api/auth/refresh | Public |
+| POST | /api/auth/logout | USER |
+| GET | /api/user/me | USER |
+| PUT | /api/user/me | USER |
+| POST | /api/user/change-password | USER |
 
-**Business Rules:**
-- Số điện thoại unique
-- Password mã hóa BCrypt
-- JWT stateless, role-based
-- Mỗi user chỉ có 1 Refresh Token tại 1 thời điểm
-- Refresh Token rotate mỗi lần sử dụng — token cũ bị xóa, token mới được cấp
+### Module 3 - Security & JWT
 
----
+- JWT generate/validate
+- `JwtAuthenticationFilter`
+- Rate limit login/register
+- Stateless session + RBAC
 
-### Module 3 – Security & JWT
+### Module 4 - Car Management
 
-**Mục tiêu:** Bảo mật toàn bộ API.
-
-**Features:**
-- JWT generate / validate
-- Custom `JwtAuthenticationFilter`
-- Rate limiting login (10 req/phút), register (5 req/phút) bằng Bucket4j
-- Stateless session, RBAC
-
-**Cơ chế verify JWT:**
-```
-Token gồm 3 phần: Header.Payload.Signature
-
-Tạo token:
-HMAC-SHA256(Header + Payload, secret_key) → Signature
-
-Verify token:
-1. Tách Header, Payload, Signature
-2. Tính lại HMAC-SHA256(Header + Payload, secret_key)
-3. So sánh với Signature trong token
-   → Khớp + còn hạn → hợp lệ → cho đi tiếp
-   → Không khớp     → reject 401
-```
-
----
-
-### Module 4 – Car Management
-
-**Mục tiêu:** USER xem xe, ADMIN CRUD xe.
+**Muc tieu:** USER xem xe, ADMIN CRUD xe.
 
 **Endpoints:**
 
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| GET | /api/cars | Public | Xem danh sách xe (filter brand, price, status) |
-| GET | /api/cars/{id} | Public | Xem chi tiết xe |
-| GET | /api/cars/{id}/availability | Public | Xem lịch các ngày đã được đặt của xe |
-| POST | /api/admin/cars | ADMIN | Tạo xe mới |
-| PUT | /api/admin/cars/{id} | ADMIN | Cập nhật thông tin xe |
-| DELETE | /api/admin/cars/{id} | ADMIN | Xóa xe (soft delete) |
-
-**Business Rules:**
-- `licensePlate` unique
-- Soft delete: chuyển status → `DISABLED`
-- `GET /api/cars/{id}/availability` trả về danh sách ngày đã bị đặt từ hôm nay trở đi, dựa trên Booking table (không dựa vào `Car.status`)
+| Method | Endpoint | Role |
+|--------|----------|------|
+| GET | /api/cars | Public |
+| GET | /api/cars/{id} | Public |
+| GET | /api/cars/{id}/availability | Public |
+| POST | /api/admin/cars | ADMIN |
+| PUT | /api/admin/cars/{id} | ADMIN |
+| DELETE | /api/admin/cars/{id} | ADMIN |
 
 **Car Status:**
+
+```text
+AVAILABLE   -> xe san sang cho thue
+PENDING     -> xe duoc tam giu trong thoi gian cho thanh toan
+BOOKED      -> booking da thanh toan thanh cong
+MAINTENANCE -> xe dang bao duong
+DISABLED    -> xe da bi xoa (soft delete)
 ```
-AVAILABLE   → xe sẵn sàng cho thuê
-BOOKED      → xe đang được giữ (set thủ công bởi Admin)
-MAINTENANCE → xe đang bảo dưỡng
-DISABLED    → xe đã bị xóa (soft delete)
-```
 
----
+### Module 5 - Booking Management
 
-### Module 5 – Booking Management
-
-**Mục tiêu:** USER tạo/xem/hủy booking, ADMIN xem/hủy booking.
+**Muc tieu:** USER tao/xem/huy booking, ADMIN xem/huy booking.
 
 **Endpoints:**
 
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| POST | /api/bookings | USER | Tạo booking mới |
-| GET | /api/bookings/my-bookings | USER | Xem danh sách booking của tôi |
-| GET | /api/bookings/{id} | USER | Xem chi tiết booking của tôi |
-| PUT | /api/bookings/{id}/cancel | USER | Hủy booking (chỉ khi PENDING) |
-| GET | /api/admin/bookings | ADMIN | Xem tất cả booking |
-| PUT | /api/admin/bookings/{id}/cancel | ADMIN | Hủy booking bất kỳ |
+| Method | Endpoint | Role |
+|--------|----------|------|
+| POST | /api/bookings | USER |
+| GET | /api/bookings/my-bookings | USER |
+| GET | /api/bookings/{id} | USER |
+| PUT | /api/bookings/{id}/cancel | USER |
+| GET | /api/admin/bookings | ADMIN |
+| PUT | /api/admin/bookings/{id}/cancel | ADMIN |
 
 **Business Rules:**
-- Kiểm tra trùng lịch (overlapping) bằng native query trước khi tạo booking
-- Giá booking = số ngày thuê × giá xe/ngày
-- Booking tạo ra với status `PENDING`
-- **Invoice tự động sinh ngay khi booking được tạo** (status `UNPAID`)
-- USER chỉ hủy được booking khi status = `PENDING`
-- ADMIN có thể hủy booking ở bất kỳ trạng thái nào
+
+- Kiem tra trung lich (overlapping) truoc khi tao booking
+- Gia booking = so ngay thue x gia xe/ngay
+- Booking tao ra voi status `PENDING`
+- Invoice tu dong sinh ngay khi booking duoc tao voi status `UNPAID`
+- Car chuyen sang `PENDING` khi booking de tam giu xe cho thanh toan
+- USER chi huy duoc booking khi status `PENDING`
+- ADMIN co the huy booking o bat ky trang thai nao
+- Booking `PENDING` + invoice `UNPAID` se auto-expire khi qua timeout thanh toan
+- Config timeout/interval:
+  - `booking.expiration.pending-payment-timeout=15m`
+  - `booking.expiration.cleanup-interval=5m`
 
 **Booking Status Flow:**
+
+```text
+PENDING -> COMPLETED  (payment SUCCESS)
+PENDING -> CANCELLED  (user/admin huy, payment FAILED, hoac auto-expire)
 ```
-PENDING → COMPLETED  (khi payment SUCCESS)
-PENDING → CANCELLED  (khi user/admin hủy hoặc payment FAILED)
-```
 
----
+### Module 6 - Invoice Management
 
-### Module 6 – Invoice Management
-
-**Mục tiêu:** Quản lý hóa đơn, tự động sinh khi booking được tạo.
+**Muc tieu:** Quan ly hoa don, tu dong sinh khi tao booking.
 
 **Endpoints:**
 
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| GET | /api/invoices/my-invoices | USER | Xem danh sách hóa đơn của tôi |
-| GET | /api/invoices/{id} | USER | Xem chi tiết hóa đơn của tôi |
-| GET | /api/admin/invoices | ADMIN | Xem tất cả hóa đơn (filter theo status) |
-
-**Query params:**
-```
-GET /api/admin/invoices?status=UNPAID
-GET /api/admin/invoices?status=PAID
-GET /api/admin/invoices?status=FAILED
-```
-
-**Business Rules:**
-- Invoice tự động tạo khi booking được tạo, không thể tạo thủ công
-- Quan hệ 1-1 giữa Booking và Invoice
-- `totalAmount` = `totalPrice` của Booking
-- Invoice number tự sinh theo format: `INV-{năm}-{số thứ tự 4 chữ số}` (VD: `INV-2026-0001`)
-- USER chỉ xem được invoice của chính mình
+| Method | Endpoint | Role |
+|--------|----------|------|
+| GET | /api/invoices/my-invoices | USER |
+| GET | /api/invoices/{id} | USER |
+| GET | /api/admin/invoices | ADMIN |
 
 **Invoice Status Flow:**
+
+```text
+UNPAID -> PAID   (payment SUCCESS)
+UNPAID -> FAILED (payment FAILED hoac auto-expire)
 ```
-UNPAID → PAID    (khi payment SUCCESS)
-UNPAID → FAILED  (khi payment FAILED)
-```
 
----
+### Module 7 - Payment Management
 
-### Module 7 – Payment Management
-
-**Mục tiêu:** ADMIN xác nhận thanh toán, hệ thống tự động cập nhật trạng thái Invoice và Booking.
+**Muc tieu:** ADMIN xac nhan thanh toan va cap nhat trang thai lien quan.
 
 **Endpoints:**
 
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| GET | /api/payments/my-payments | USER | Xem danh sách payment của tôi |
-| GET | /api/payments/{id} | USER | Xem chi tiết payment của tôi |
-| GET | /api/admin/payments | ADMIN | Xem tất cả payment (filter theo status) |
-| PUT | /api/admin/payments/confirm/{invoiceId} | ADMIN | Xác nhận thanh toán |
-
-**Query params:**
-```
-GET /api/admin/payments?status=SUCCESS
-GET /api/admin/payments?status=PENDING
-GET /api/admin/payments?status=FAILED
-```
-
-**Confirm Payment Request Body:**
-```json
-{
-    "result": "SUCCESS",
-    "paymentMethod": "BANK_TRANSFER",
-    "transactionCode": "FT26087123456"
-}
-```
-
-**Business Rules:**
-- Payment không do USER tạo thủ công — được tạo tự động khi ADMIN confirm
-- Invoice phải ở trạng thái `UNPAID` mới confirm được
-- Mỗi Invoice chỉ có tối đa 1 Payment (tránh double confirm)
-- `paymentMethod` mặc định `BANK_TRANSFER` nếu không truyền
-- `transactionCode` nullable — dùng cho đối soát, tích hợp gateway sau này
+| Method | Endpoint | Role |
+|--------|----------|------|
+| GET | /api/payments/my-payments | USER |
+| GET | /api/payments/{id} | USER |
+| GET | /api/admin/payments | ADMIN |
+| PUT | /api/admin/payments/confirm/{invoiceId} | ADMIN |
 
 **Khi confirm SUCCESS:**
-```
-Payment  → SUCCESS
-Invoice  → PAID
-Booking  → COMPLETED
+
+```text
+Payment -> SUCCESS
+Invoice -> PAID
+Booking -> COMPLETED
+Car     -> BOOKED
 ```
 
 **Khi confirm FAILED:**
-```
-Payment  → FAILED
-Invoice  → FAILED
-Booking  → CANCELLED
-Car      → AVAILABLE
+
+```text
+Payment -> FAILED
+Invoice -> FAILED
+Booking -> CANCELLED
+Car     -> AVAILABLE
 ```
 
-**Payment Status:**
-```
-SUCCESS  → thanh toán thành công
-FAILED   → thanh toán thất bại
-```
+### Module 8 - Exception & Validation
 
-**Payment Method:**
-```
-CASH          → tiền mặt
-BANK_TRANSFER → chuyển khoản (mặc định)
-MOMO          → placeholder tích hợp sau
-ZALOPAY       → placeholder tích hợp sau
-VNPAY         → placeholder tích hợp sau
-```
+- Global exception handler (`@RestControllerAdvice`)
+- Response wrapper `ApiResponse<T>`
+- Domain error code
+
+### Module 9 - Email Notification
+
+- Gui OTP reset password
+- Gui email async (`@Async`)
+
+### Module 10 - Monitoring & Observability
+
+- Actuator: health, metrics, loggers
+- Structured logging + MDC
 
 ---
 
-### Module 8 – Exception & Validation
+## Pagination
 
-**Mục tiêu:** Xử lý lỗi tập trung, response thống nhất.
+Tat ca endpoint list ho tro:
 
-**Features:**
-- `@RestControllerAdvice` — Global Exception Handler
-- `ApiResponse<T>` wrapper thống nhất cho tất cả response
-- Custom exceptions cho từng domain
+- `page` (default `0`)
+- `size` (default `10`, max `50`)
 
 ---
 
-### Module 9 – Email Notification System
+## Business Flow hoan chinh
 
-**Mục tiêu:** Gửi email thông báo tự động (hiện tại: OTP đặt lại mật khẩu), không block luồng API chính.
+```text
+1. USER dang ky / dang nhap
+   -> Nhan Access Token (15 phut) + Refresh Token (7 ngay)
 
-**Endpoints:**
-
-| Method | Endpoint | Role | Mô tả |
-|--------|----------|------|-------|
-| POST | /api/auth/forgot-password | Public | Gửi OTP đặt lại mật khẩu về email |
-| POST | /api/auth/reset-password | Public | Đặt lại mật khẩu bằng OTP |
-
-**Business Rules:**
-- OTP gồm 6 chữ số, sinh ngẫu nhiên bằng `SecureRandom`
-- OTP có hiệu lực trong **1 phút**, sau đó tự động hết hạn
-- Mỗi lần gọi `/forgot-password`, OTP cũ của user bị xóa, OTP mới được tạo
-- OTP chỉ dùng được **1 lần** — sau khi reset thành công, token bị đánh dấu `used = true`
-- Nếu email không tồn tại trong hệ thống → API vẫn trả về 200 OK (bảo vệ thông tin user)
-- Email được gửi **bất đồng bộ** (`@Async`) — không block request, API trả về ngay lập tức
-
-**OTP Status Flow:**
-```
-Mới tạo (used=false, chưa hết hạn)
-    → Dùng 1 lần  → used=true  → PASSWORD_RESET_OTP_USED
-    → Hết 1 phút  → expired()  → PASSWORD_RESET_OTP_EXPIRED
-    → OTP sai     →            → PASSWORD_RESET_OTP_INVALID
-```
-
----
-
-### Module 10 – Monitoring & Observability
-
-**Mục tiêu:** Giám sát sức khỏe hệ thống và truy vết lỗi tự động qua file log.
-
-**Features:**
-- **Spring Boot Actuator:** Mở các endpoint giám sát nội bộ:
-  - `GET /actuator/health` (Public một phần): Xem trạng thái hoạt động (UP/DOWN) của Máy chủ, Cơ sở dữ liệu và kết nối SMTP.
-  - `GET /actuator/metrics`, `/actuator/loggers` (Chỉ dành cho Role `ADMIN`): Xem thông số hệ thống và thay đổi log-level runtime.
-- **Structured Logging & MDC (Mapped Diagnostic Context):**
-  - Mọi request đều được tự động chèn thêm `X-Request-ID`, `userPhone` và `role` để dễ dàng dò tìm lỗi chéo trên toàn hệ thống.
-  - Profile `dev`: Xuất log dạng chữ có đính kèm metadata có màu.
-  - Profile `prod`: Tự động gói toàn bộ log thành định dạng **JSON** chuẩn (thông qua `logstash-logback-encoder`) để đẩy thẳng lên hệ thống Logstash/Kibana.
-
----
-
-## 📄 Pagination
-
-Tất cả các endpoint GET list đều hỗ trợ phân trang.
-
-### Query params
-
-| Param | Mặc định | Giới hạn | Mô tả |
-|-------|----------|----------|-------|
-| `page` | `0` | — | Số trang, bắt đầu từ 0 |
-| `size` | `10` | tối đa `50` | Số bản ghi mỗi trang |
-
-| Field | Mô tả |
-|-------|-------|
-| `content` | Danh sách bản ghi trong trang hiện tại |
-| `pageNumber` | Số trang hiện tại (bắt đầu từ 0) |
-| `pageSize` | Số bản ghi mỗi trang |
-| `totalElements` | Tổng số bản ghi trong DB |
-| `totalPages` | Tổng số trang |
-| `first` | `true` nếu đây là trang đầu |
-| `last` | `true` nếu đây là trang cuối |
-
-### Các endpoint hỗ trợ pagination
-
-| Endpoint | Role |
-|----------|------|
-| `GET /api/cars` | Public |
-| `GET /api/bookings/my-bookings` | USER |
-| `GET /api/invoices/my-invoices` | USER |
-| `GET /api/payments/my-payments` | USER |
-| `GET /api/admin/bookings` | ADMIN |
-| `GET /api/admin/invoices` | ADMIN |
-| `GET /api/admin/payments` | ADMIN |
-
----
-
-## 🚀 Business Flow hoàn chỉnh
-
-```
-1. USER đăng ký / đăng nhập
-   → Nhận Access Token (15 phút) + Refresh Token (7 ngày)
-
-2. USER xem danh sách xe available
+2. USER xem danh sach xe available
    GET /api/cars
 
-3. USER xem lịch xe trước khi đặt
+3. USER xem lich xe truoc khi dat
    GET /api/cars/{id}/availability
-   → Trả về danh sách ngày đã bị đặt
 
-4. USER tạo booking
+4. USER tao booking
    POST /api/bookings
-   → Booking: PENDING
-   → Invoice: UNPAID (tự sinh ngay)
+   -> Booking: PENDING
+   -> Invoice: UNPAID
+   -> Car: PENDING
 
-5. USER chuyển khoản theo thông tin hóa đơn (ngoài hệ thống)
+5. USER chuyen khoan theo thong tin hoa don (ngoai he thong)
 
-6. ADMIN xác nhận thanh toán
+6. Scheduler auto-expire booking qua han thanh toan
+   Chay dinh ky theo `booking.expiration.cleanup-interval` (mac dinh 5m)
+   Neu qua `booking.expiration.pending-payment-timeout` (mac dinh 15m):
+   -> Booking: CANCELLED
+   -> Invoice: FAILED
+   -> Car: AVAILABLE
+
+7. ADMIN confirm payment
    PUT /api/admin/payments/confirm/{invoiceId}
 
-   Nếu SUCCESS:
-   → Payment:  SUCCESS
-   → Invoice:  PAID
-   → Booking:  COMPLETED
+   Neu SUCCESS:
+   -> Payment: SUCCESS
+   -> Invoice: PAID
+   -> Booking: COMPLETED
+   -> Car: BOOKED
 
-   Nếu FAILED:
-   → Payment:  FAILED
-   → Invoice:  FAILED
-   → Booking:  CANCELLED
-   → Car:      AVAILABLE
-
---- Quên mật khẩu ---
-
-7. USER quên mật khẩu
-   POST /api/auth/forgot-password  { "email": "..." }
-   → Xóa OTP cũ (nếu có)
-   → Tạo OTP mới (6 số, hết hạn sau 1 phút)
-   → Gửi email bất đồng bộ (@Async) → API trả 200 OK ngay
-
-8. USER nhập OTP từ email
-   POST /api/auth/reset-password  { email, otp, newPassword, confirmPassword }
-   → Kiểm tra OTP hợp lệ / chưa dùng / chưa hết hạn
-   → Mã hóa mật khẩu mới (BCrypt), lưu DB
-   → Đánh dấu OTP used=true
-
+   Neu FAILED:
+   -> Payment: FAILED
+   -> Invoice: FAILED
+   -> Booking: CANCELLED
+   -> Car: AVAILABLE
 ```
 
 ---
 
-## ⚙️ Setup & Run
+## Main Entities
 
-### 1. Clone project
-
-```bash
-git clone https://github.com/your-username/vehicle-booking-system.git
-cd vehicle-booking-system
-```
-
----
-
-**Entities chính:**
-
-| Entity | Mô tả |
+| Entity | Mo ta |
 |--------|-------|
-| User | Tài khoản người dùng (ADMIN / USER) |
-| Car | Thông tin xe cho thuê |
-| Booking | Đơn đặt xe |
-| Invoice | Hóa đơn thanh toán (1-1 với Booking) |
-| Payment | Lịch sử giao dịch (1-1 với Invoice) |
-| RefreshToken | Refresh Token của user (1-1 với User, lưu DB) |
-| PasswordResetToken | OTP đặt lại mật khẩu (1-1 với User, có TTL 1 phút) |
+| User | Tai khoan nguoi dung |
+| Car | Thong tin xe cho thue |
+| Booking | Don dat xe |
+| Invoice | Hoa don thanh toan (1-1 voi Booking) |
+| Payment | Giao dich (1-1 voi Invoice) |
+| RefreshToken | Refresh token cua user |
+| PasswordResetToken | OTP dat lai mat khau |
 
 **Relationships:**
-```
-User         1 ──── N  Booking
-Car          1 ──── N  Booking
-Booking      1 ──── 1  Invoice
-Invoice      1 ──── 1  Payment
-User         1 ──── 1  RefreshToken
-User         1 ──── 1  PasswordResetToken
+
+```text
+User    1 ---- N Booking
+Car     1 ---- N Booking
+Booking 1 ---- 1 Invoice
+Invoice 1 ---- 1 Payment
+User    1 ---- 1 RefreshToken
+User    1 ---- 1 PasswordResetToken
 ```

@@ -11,6 +11,7 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -34,6 +35,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findByUserUserIdAndStatus(Long userId, BookingStatus status);
 
     List<Booking> findByStatus(BookingStatus status);
+
+    @Query("""
+    select b from Booking b
+    join b.invoice i
+    where b.status = 'PENDING'
+      and i.status = 'UNPAID'
+      and b.createdAt <= :cutoff
+    """)
+    List<Booking> findExpiredPendingUnpaidBookings(@Param("cutoff") LocalDateTime cutoff);
 
     @Query("""
     select b from Booking b

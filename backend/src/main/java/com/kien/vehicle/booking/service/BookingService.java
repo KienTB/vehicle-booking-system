@@ -6,6 +6,7 @@ import com.kien.vehicle.booking.dto.response.BookingSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingService {
@@ -19,4 +20,6 @@ public interface BookingService {
     BookingResponse getBookingById(Long bookingId, String currentUserPhone, boolean isAdmin);
 
     BookingResponse cancelBooking(Long bookingId, String currentUserPhone, boolean isAdmin);
+
+    List<Long> expirePendingUnpaidBookings(LocalDateTime cutoff);
 }
