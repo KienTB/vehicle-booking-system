@@ -1,9 +1,8 @@
 package com.kien.vehicle.booking.config;
 
 import io.github.bucket4j.Bandwidth;
-import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
-import io.github.bucket4j.distributed.proxy.ProxyManager;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,15 +11,37 @@ import java.time.Duration;
 @Configuration
 public class RateLimitConfig {
 
+    @Value("${security.rate-limit.login.capacity:10}")
+    private long loginCapacity;
+
+    @Value("${security.rate-limit.login.refill-tokens:10}")
+    private long loginRefillTokens;
+
+    @Value("${security.rate-limit.login.refill-duration:1m}")
+    private Duration loginRefillDuration;
+
+    @Value("${security.rate-limit.register.capacity:5}")
+    private long registerCapacity;
+
+    @Value("${security.rate-limit.register.refill-tokens:5}")
+    private long registerRefillTokens;
+
+    @Value("${security.rate-limit.register.refill-duration:1m}")
+    private Duration registerRefillDuration;
+
     @Bean
-    public Bucket loginBucket() {
-        Bandwidth limit = Bandwidth.classic(10, Refill.intervally(10, Duration.ofMinutes(1)));
-        return Bucket.builder().addLimit(limit).build();
+    public Bandwidth loginBandwidth() {
+        return Bandwidth.classic(
+                loginCapacity,
+                Refill.intervally(loginRefillTokens, loginRefillDuration)
+        );
     }
 
     @Bean
-    public Bucket registerBucket() {
-        Bandwidth limit = Bandwidth.classic(5, Refill.intervally(5, Duration.ofMinutes(1)));
-        return Bucket.builder().addLimit(limit).build();
+    public Bandwidth registerBandwidth() {
+        return Bandwidth.classic(
+                registerCapacity,
+                Refill.intervally(registerRefillTokens, registerRefillDuration)
+        );
     }
 }

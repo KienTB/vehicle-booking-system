@@ -52,6 +52,23 @@ Spring Boot + JWT + MySQL + Swagger UI.
 - Rate limit login/register
 - Stateless session + RBAC
 
+**Rate Limit (Auth endpoints):**
+
+- Ap dung cho:
+  - `POST /api/auth/login`
+  - `POST /api/auth/register`
+- Match theo `POST + exact path` (khong dung `contains`)
+- Rate limit theo tung client (key: `endpoint:clientIp`), khong dung bucket global
+- Response khi vuot nguong:
+  - HTTP `429 Too Many Requests`
+  - Headers:
+    - `Retry-After`
+    - `X-RateLimit-Remaining`
+  - Body:
+    - `{"success":false,"message":"Too many requests. Please try again later."}`
+- Memory safety:
+  - Bucket in-memory co TTL, duoc cleanup dinh ky de tranh phinh RAM
+
 ### Module 4 - Car Management
 
 **Muc tieu:** USER xem xe, ADMIN CRUD xe.
