@@ -1,7 +1,6 @@
 package com.kien.vehicle.booking.controller;
 
 import com.kien.vehicle.booking.dto.response.*;
-import com.kien.vehicle.booking.model.CarStatus;
 import com.kien.vehicle.booking.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,17 +25,41 @@ public class CarController {
     public ResponseEntity<ApiResponse<PageResponse<CarSummaryResponse>>> getAllCars(
             @RequestParam(required = false, defaultValue = "true") boolean onlyAvailable,
             @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String transmission,
+            @RequestParam(required = false) String fuelType,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) CarStatus status,
+            @RequestParam(required = false) List<Integer> seats,
             @RequestParam(defaultValue = "0")  int page,
             @RequestParam(defaultValue = "10") int size) {
 
         Pageable pageable = PageRequest.of(page, Math.min(size, 50));
 
+        boolean hasAdvancedFilters = brand != null
+                || minPrice != null
+                || maxPrice != null
+                || name != null
+                || location != null
+                || transmission != null
+                || fuelType != null
+                || (seats != null && !seats.isEmpty());
+
         Page<CarSummaryResponse> result;
-        if (brand != null || minPrice != null || maxPrice != null || status != null) {
-            result = carService.searchCars(brand, minPrice, maxPrice, status, pageable);
+        if (hasAdvancedFilters) {
+            result = carService.searchCars(
+                    onlyAvailable,
+                    brand,
+                    name,
+                    location,
+                    transmission,
+                    fuelType,
+                    minPrice,
+                    maxPrice,
+                    seats,
+                    pageable
+            );
         } else {
             result = carService.getAllCars(onlyAvailable, pageable);
         }

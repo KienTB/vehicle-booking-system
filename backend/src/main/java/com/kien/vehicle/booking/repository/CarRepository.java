@@ -25,16 +25,25 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     @Query("""
     SELECT c FROM Car c
     WHERE (:brand IS NULL OR LOWER(c.brand) LIKE LOWER(CONCAT('%', :brand, '%')))
+      AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
+      AND (:location IS NULL OR LOWER(c.location) LIKE LOWER(CONCAT('%', :location, '%')))
+      AND (:transmission IS NULL OR LOWER(c.transmission) = LOWER(:transmission))
+      AND (:fuelType IS NULL OR LOWER(c.fuelType) = LOWER(:fuelType))
       AND (:minPrice IS NULL OR c.pricePerDay >= :minPrice)
       AND (:maxPrice IS NULL OR c.pricePerDay <= :maxPrice)
-      AND (:status IS NULL OR c.status = :status)
+      AND (:filterBySeats = false OR c.seats IN :seats)
       AND (:onlyAvailable = false OR c.status = 'AVAILABLE')
     """)
     Page<Car> findWithFilters(
             @Param("brand")         String brand,
+            @Param("name")          String name,
+            @Param("location")      String location,
+            @Param("transmission")  String transmission,
+            @Param("fuelType")      String fuelType,
             @Param("minPrice")      BigDecimal minPrice,
-            @Param("maxPrice") BigDecimal maxPrice,
-            @Param("status")        CarStatus status,
+            @Param("maxPrice")      BigDecimal maxPrice,
+            @Param("filterBySeats") boolean filterBySeats,
+            @Param("seats")         List<Integer> seats,
             @Param("onlyAvailable") boolean onlyAvailable,
             Pageable pageable
     );

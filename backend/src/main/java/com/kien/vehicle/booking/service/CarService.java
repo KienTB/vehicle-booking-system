@@ -24,7 +24,18 @@ public interface CarService {
 
     Page<CarSummaryResponse> getAllCars(boolean onlyAvailable, Pageable pageable);
 
-    Page<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status, Pageable pageable);
+    Page<CarSummaryResponse> searchCars(
+            boolean onlyAvailable,
+            String brand,
+            String name,
+            String location,
+            String transmission,
+            String fuelType,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<Integer> seats,
+            Pageable pageable
+    );
 
     CarAvailabilityResponse getCarAvailability(Long carId);
 }

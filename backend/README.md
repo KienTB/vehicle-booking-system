@@ -67,6 +67,21 @@ Spring Boot + JWT + MySQL + Swagger UI.
 | PUT | /api/admin/cars/{id} | ADMIN |
 | DELETE | /api/admin/cars/{id} | ADMIN |
 
+**Advanced Search & Filter (`GET /api/cars`):**
+
+- Supported query params:
+  - `onlyAvailable` (default `true`)
+  - `brand`, `name`, `location`, `transmission`, `fuelType`
+  - `minPrice`, `maxPrice`
+  - `seats` (multi-select, list): `4`, `5`, `7`, `8`, `9`
+- Example requests:
+  - `/api/cars?brand=toyota&minPrice=500000&maxPrice=1200000`
+  - `/api/cars?location=hcm&transmission=automatic&fuelType=gasoline`
+  - `/api/cars?seats=4&seats=5&seats=7`
+- Validation rules:
+  - `minPrice <= maxPrice`, both must be non-negative
+  - `seats` only accepts: `4,5,7,8,9`
+
 **Car Status:**
 
 ```text

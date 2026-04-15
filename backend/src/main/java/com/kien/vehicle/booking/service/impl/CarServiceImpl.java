@@ -19,16 +19,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CarServiceImpl implements CarService {
+
+    private static final Set<Integer> SUPPORTED_SEATS = Set.of(4, 5, 7, 8, 9);
 
     private final CarRepository carRepository;
     private final BookingRepository bookingRepository;
@@ -114,8 +119,37 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Page<CarSummaryResponse> searchCars(String brand, BigDecimal minPrice, BigDecimal maxPrice, CarStatus status, Pageable pageable) {
-        return carRepository.findWithFilters(brand, minPrice, maxPrice, status, false, pageable)
+    public Page<CarSummaryResponse> searchCars(
+            boolean onlyAvailable,
+            String brand,
+            String name,
+            String location,
+            String transmission,
+            String fuelType,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<Integer> seats,
+            Pageable pageable
+    ) {
+        validateSearchFilters(minPrice, maxPrice, seats);
+
+        List<Integer> normalizedSeats = normalizeSeats(seats);
+        boolean filterBySeats = !normalizedSeats.isEmpty();
+        List<Integer> seatsForQuery = filterBySeats ? normalizedSeats : List.copyOf(SUPPORTED_SEATS);
+
+        return carRepository.findWithFilters(
+                        normalizeText(brand),
+                        normalizeText(name),
+                        normalizeText(location),
+                        normalizeText(transmission),
+                        normalizeText(fuelType),
+                        minPrice,
+                        maxPrice,
+                        filterBySeats,
+                        seatsForQuery,
+                        onlyAvailable,
+                        pageable
+                )
                 .map(this::mapToSummary);
     }
 
@@ -171,5 +205,39 @@ public class CarServiceImpl implements CarService {
                 car.getSeats(),
                 car.getLocation()
         );
+    }
+
+    private String normalizeText(String value) {
+        return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private List<Integer> normalizeSeats(List<Integer> seats) {
+        if (seats == null || seats.isEmpty()) {
+            return List.of();
+        }
+        return new LinkedHashSet<>(seats).stream()
+                .filter(value -> value != null)
+                .toList();
+    }
+
+    private void validateSearchFilters(
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            List<Integer> seats
+    ) {
+        if (minPrice != null && minPrice.signum() < 0) {
+            throw new AppException(ErrorCode.CAR_FILTER_INVALID_PRICE_RANGE);
+        }
+        if (maxPrice != null && maxPrice.signum() < 0) {
+            throw new AppException(ErrorCode.CAR_FILTER_INVALID_PRICE_RANGE);
+        }
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new AppException(ErrorCode.CAR_FILTER_INVALID_PRICE_RANGE);
+        }
+
+        List<Integer> normalizedSeats = normalizeSeats(seats);
+        if (!normalizedSeats.stream().allMatch(SUPPORTED_SEATS::contains)) {
+            throw new AppException(ErrorCode.CAR_FILTER_INVALID_SEATS);
+        }
     }
 }

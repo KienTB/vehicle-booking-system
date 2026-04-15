@@ -98,6 +98,16 @@ public enum ErrorCode {
             "Biển số xe '%s' đã tồn tại.",
             HttpStatus.CONFLICT
     ),
+    CAR_FILTER_INVALID_PRICE_RANGE(
+            "CAR_FILTER_INVALID_PRICE_RANGE",
+            "Khoang gia khong hop le. minPrice phai <= maxPrice va khong am.",
+            HttpStatus.BAD_REQUEST
+    ),
+    CAR_FILTER_INVALID_SEATS(
+            "CAR_FILTER_INVALID_SEATS",
+            "Bo loc so cho khong hop le. Chi ho tro: 4, 5, 7, 8, 9.",
+            HttpStatus.BAD_REQUEST
+    ),
     BOOKING_NOT_FOUND(
             "BOOKING_NOT_FOUND",
             "Không tìm thấy booking với ID: %s",
@@ -196,3 +206,6 @@ public enum ErrorCode {
         return String.format(message, args);
     }
 }
+
+
+
