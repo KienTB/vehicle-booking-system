@@ -1,8 +1,10 @@
 package com.kien.vehicle.booking.dto.request;
 
-import com.kien.vehicle.booking.model.CarStatus;
-
 import java.math.BigDecimal;
+
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 
 public record CarUpdateRequest(
         String name,
@@ -13,8 +15,9 @@ public record CarUpdateRequest(
         CarStatus status,
         String imageUrl,
         Integer seats,
-        String transmission,
-        String fuelType,
+        Transmission transmission,
+        FuelType fuelType,
         String location
 ) {
 }
+

@@ -1,13 +1,14 @@
 package com.kien.vehicle.booking.repository;
 
-import com.kien.vehicle.booking.model.Invoice;
-import com.kien.vehicle.booking.model.InvoiceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import com.kien.vehicle.booking.entity.Invoice;
+import com.kien.vehicle.booking.entity.enums.InvoiceStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,3 +23,4 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<String> findMaxInvoiceNumberByPrefix(@Param("prefix") String prefix);
     boolean existsByBookingBookingId(Long bookingId);
 }
+

@@ -1,11 +1,11 @@
 package com.kien.vehicle.booking.dto.response;
 
-import com.kien.vehicle.booking.model.PaymentMethod;
-import com.kien.vehicle.booking.model.PaymentStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.kien.vehicle.booking.entity.enums.PaymentMethod;
+import com.kien.vehicle.booking.entity.enums.PaymentStatus;
 
 public record PaymentSummaryResponse(
         Long paymentId,
@@ -19,3 +19,4 @@ public record PaymentSummaryResponse(
         LocalDateTime createAt
 ) {
 }
+

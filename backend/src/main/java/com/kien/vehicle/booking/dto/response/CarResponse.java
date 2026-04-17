@@ -1,9 +1,11 @@
 package com.kien.vehicle.booking.dto.response;
 
-import com.kien.vehicle.booking.model.CarStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 
 public record CarResponse(
         Long id,
@@ -15,8 +17,8 @@ public record CarResponse(
         CarStatus status,
         String imageUrl,
         Integer seats,
-        String transmission,
-        String fuelType,
+        Transmission transmission,
+        FuelType fuelType,
         String location,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

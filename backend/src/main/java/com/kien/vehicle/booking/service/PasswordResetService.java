@@ -2,10 +2,10 @@ package com.kien.vehicle.booking.service;
 
 import com.kien.vehicle.booking.dto.request.ForgotPasswordRequest;
 import com.kien.vehicle.booking.dto.request.ResetPasswordRequest;
+import com.kien.vehicle.booking.entity.PasswordResetToken;
+import com.kien.vehicle.booking.entity.User;
 import com.kien.vehicle.booking.exception.AppException;
 import com.kien.vehicle.booking.exception.ErrorCode;
-import com.kien.vehicle.booking.model.PasswordResetToken;
-import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.PasswordResetTokenRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

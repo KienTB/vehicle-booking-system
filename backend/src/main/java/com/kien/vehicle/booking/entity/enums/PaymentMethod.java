@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.model;
+package com.kien.vehicle.booking.entity.enums;
 
 public enum PaymentMethod {
     CASH,
@@ -7,3 +7,4 @@ public enum PaymentMethod {
     ZALOPAY,
     VNPAY
 }
+

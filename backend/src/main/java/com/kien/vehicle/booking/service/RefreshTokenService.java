@@ -1,9 +1,9 @@
 package com.kien.vehicle.booking.service;
 
+import com.kien.vehicle.booking.entity.RefreshToken;
+import com.kien.vehicle.booking.entity.User;
 import com.kien.vehicle.booking.exception.AppException;
 import com.kien.vehicle.booking.exception.ErrorCode;
-import com.kien.vehicle.booking.model.RefreshToken;
-import com.kien.vehicle.booking.model.User;
 import com.kien.vehicle.booking.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

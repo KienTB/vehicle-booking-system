@@ -1,8 +1,8 @@
 package com.kien.vehicle.booking.dto.response;
 
-import com.kien.vehicle.booking.model.CarStatus;
-
 import java.math.BigDecimal;
+
+import com.kien.vehicle.booking.entity.enums.CarStatus;
 
 public record CarSummaryResponse(
         Long id,

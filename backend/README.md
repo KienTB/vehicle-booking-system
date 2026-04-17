@@ -1,183 +1,174 @@
-# Vehicle Booking System
+# Hệ Thống Đặt Xe (Vehicle Booking System)
 
-RESTful API quan ly dat xe cho thue (car rental).
-Spring Boot + JWT + MySQL + Swagger UI.
+API REST quản lý đặt xe cho thuê, xây dựng bằng Spring Boot, JWT, MySQL và Swagger UI.
 
 ---
 
-## Tech Stack
+## Công nghệ sử dụng
 
 - Java 21
 - Spring Boot 3.3.5
 - Spring Data JPA (Hibernate)
 - MySQL
+- Flyway Migration
+- Spring Security + JWT
 - SpringDoc OpenAPI (Swagger UI)
 - Spring Mail
+- Actuator
 - Gradle
 
 ---
 
-## Security & Roles
+## Bảo mật và phân quyền
 
-- JWT stateless authentication
+- Xác thực JWT theo mô hình stateless
 - Refresh token rotation
-- Roles:
-  - `ADMIN`: quan ly xe, booking, xac nhan thanh toan, quan ly hoa don
-  - `USER`: dang ky/dang nhap, xem xe, dat xe, xem hoa don va payment
+- Phân quyền:
+  - `ADMIN`: quản lý xe, booking, xác nhận thanh toán, quản lý hóa đơn
+  - `USER`: thao tác tài khoản, xem xe, đặt xe, xem hóa đơn/thanh toán
 
 ---
 
-## Module Overview
+## Tổng quan module
 
 ### Module 2 - Authentication & User
 
-**Muc tieu:** Dang ky, dang nhap, refresh token, quan ly profile.
+**Mục tiêu:** Đăng ký, đăng nhập, refresh token, quản lý hồ sơ người dùng.
 
-**Endpoints:**
-
-| Method | Endpoint | Role |
-|--------|----------|------|
-| POST | /api/auth/register | Public |
-| POST | /api/auth/login | Public |
-| POST | /api/auth/refresh | Public |
-| POST | /api/auth/logout | USER |
-| GET | /api/user/me | USER |
-| PUT | /api/user/me | USER |
-| POST | /api/user/change-password | USER |
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| POST | `/api/auth/register` | Public |
+| POST | `/api/auth/login` | Public |
+| POST | `/api/auth/refresh` | Public |
+| POST | `/api/auth/logout` | USER |
+| GET | `/api/user/me` | USER |
+| PUT | `/api/user/me` | USER |
+| POST | `/api/user/change-password` | USER |
 
 ### Module 3 - Security & JWT
 
-- JWT generate/validate
+- Tạo/validate JWT
 - `JwtAuthenticationFilter`
-- Rate limit login/register
-- Stateless session + RBAC
+- Rate limit cho endpoint đăng nhập/đăng ký
+- Session stateless + RBAC
 
-**Rate Limit (Auth endpoints):**
+**Rate limit cho Auth**
 
-- Ap dung cho:
+- Áp dụng cho:
   - `POST /api/auth/login`
   - `POST /api/auth/register`
-- Match theo `POST + exact path` (khong dung `contains`)
-- Rate limit theo tung client (key: `endpoint:clientIp`), khong dung bucket global
-- Response khi vuot nguong:
+- Match theo `POST + exact path`
+- Limit theo từng client (key: `endpoint:clientIp`)
+- Khi vượt ngưỡng:
   - HTTP `429 Too Many Requests`
-  - Headers:
-    - `Retry-After`
-    - `X-RateLimit-Remaining`
+  - Header: `Retry-After`, `X-RateLimit-Remaining`
   - Body:
     - `{"success":false,"message":"Too many requests. Please try again later."}`
-- Memory safety:
-  - Bucket in-memory co TTL, duoc cleanup dinh ky de tranh phinh RAM
+- Bucket in-memory có TTL, cleanup định kỳ để tránh phình RAM
 
 ### Module 4 - Car Management
 
-**Muc tieu:** USER xem xe, ADMIN CRUD xe.
+**Mục tiêu:** Quản lý xe, tìm kiếm nâng cao, lọc theo nhiều tiêu chí.
 
-**Endpoints:**
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| GET | `/api/cars` | Public |
+| GET | `/api/cars/{id}` | Public |
+| GET | `/api/cars/{id}/availability` | Public |
+| POST | `/api/admin/cars` | ADMIN |
+| PUT | `/api/admin/cars/{id}` | ADMIN |
+| DELETE | `/api/admin/cars/{id}` | ADMIN |
 
-| Method | Endpoint | Role |
-|--------|----------|------|
-| GET | /api/cars | Public |
-| GET | /api/cars/{id} | Public |
-| GET | /api/cars/{id}/availability | Public |
-| POST | /api/admin/cars | ADMIN |
-| PUT | /api/admin/cars/{id} | ADMIN |
-| DELETE | /api/admin/cars/{id} | ADMIN |
+**Advanced Search & Filter - `GET /api/cars`**
 
-**Advanced Search & Filter (`GET /api/cars`):**
-
-- Supported query params:
-  - `onlyAvailable` (default `true`)
-  - `brand`, `name`, `location`, `transmission`, `fuelType`
+- Query params hỗ trợ:
+  - `onlyAvailable` (mặc định `true`)
+  - `brand`, `name`, `location`
+  - `transmission` (enum): `AUTOMATIC`, `MANUAL`
+  - `fuelType` (enum): `GASOLINE`, `DIESEL`, `ELECTRIC`, `HYBRID`
   - `minPrice`, `maxPrice`
-  - `seats` (multi-select, list): `4`, `5`, `7`, `8`, `9`
-- Example requests:
+  - `seats` (multi-select): `4`, `5`, `7`, `8`, `9`
+- Ví dụ:
   - `/api/cars?brand=toyota&minPrice=500000&maxPrice=1200000`
-  - `/api/cars?location=hcm&transmission=automatic&fuelType=gasoline`
+  - `/api/cars?location=hcm&transmission=AUTOMATIC&fuelType=GASOLINE`
   - `/api/cars?seats=4&seats=5&seats=7`
-- Validation rules:
-  - `minPrice <= maxPrice`, both must be non-negative
-  - `seats` only accepts: `4,5,7,8,9`
+- Rule validate:
+  - `minPrice <= maxPrice`, cả hai không âm
+  - `seats` chỉ nhận: `4,5,7,8,9`
 
-**Car Status:**
+**Car Status**
 
 ```text
-AVAILABLE   -> xe san sang cho thue
-PENDING     -> xe duoc tam giu trong thoi gian cho thanh toan
-BOOKED      -> booking da thanh toan thanh cong
-MAINTENANCE -> xe dang bao duong
-DISABLED    -> xe da bi xoa (soft delete)
+AVAILABLE   -> Xe sẵn sàng cho thuê
+PENDING     -> Xe tạm giữ chờ thanh toán
+BOOKED      -> Xe đã thanh toán thành công
+MAINTENANCE -> Xe đang bảo dưỡng
+DISABLED    -> Xe đã bị vô hiệu hóa (soft delete)
 ```
 
 ### Module 5 - Booking Management
 
-**Muc tieu:** USER tao/xem/huy booking, ADMIN xem/huy booking.
+**Mục tiêu:** USER tạo/xem/hủy booking, ADMIN xem/hủy booking.
 
-**Endpoints:**
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| POST | `/api/bookings` | USER |
+| GET | `/api/bookings/my-bookings` | USER |
+| GET | `/api/bookings/{id}` | USER |
+| PUT | `/api/bookings/{id}/cancel` | USER |
+| GET | `/api/admin/bookings` | ADMIN |
+| PUT | `/api/admin/bookings/{id}/cancel` | ADMIN |
 
-| Method | Endpoint | Role |
-|--------|----------|------|
-| POST | /api/bookings | USER |
-| GET | /api/bookings/my-bookings | USER |
-| GET | /api/bookings/{id} | USER |
-| PUT | /api/bookings/{id}/cancel | USER |
-| GET | /api/admin/bookings | ADMIN |
-| PUT | /api/admin/bookings/{id}/cancel | ADMIN |
+**Business rules**
 
-**Business Rules:**
-
-- Kiem tra trung lich (overlapping) truoc khi tao booking
-- Gia booking = so ngay thue x gia xe/ngay
-- Booking tao ra voi status `PENDING`
-- Invoice tu dong sinh ngay khi booking duoc tao voi status `UNPAID`
-- Car chuyen sang `PENDING` khi booking de tam giu xe cho thanh toan
-- USER chi huy duoc booking khi status `PENDING`
-- ADMIN co the huy booking o bat ky trang thai nao
-- Booking `PENDING` + invoice `UNPAID` se auto-expire khi qua timeout thanh toan
-- Config timeout/interval:
+- Kiểm tra trùng lịch trước khi tạo booking
+- Giá booking = số ngày thuê x giá xe/ngày
+- Booking tạo mới có trạng thái `PENDING`
+- Invoice tự động tạo cùng booking với trạng thái `UNPAID`
+- Car chuyển sang `PENDING` khi giữ xe chờ thanh toán
+- USER chỉ được hủy booking khi trạng thái `PENDING`
+- ADMIN có thể hủy booking ở mọi trạng thái
+- Booking `PENDING` + invoice `UNPAID` sẽ auto-expire khi quá timeout
+- Config:
   - `booking.expiration.pending-payment-timeout=15m`
   - `booking.expiration.cleanup-interval=5m`
 
-**Booking Status Flow:**
+**Booking status flow**
 
 ```text
 PENDING -> COMPLETED  (payment SUCCESS)
-PENDING -> CANCELLED  (user/admin huy, payment FAILED, hoac auto-expire)
+PENDING -> CANCELLED  (user/admin hủy, payment FAILED, hoặc auto-expire)
 ```
 
 ### Module 6 - Invoice Management
 
-**Muc tieu:** Quan ly hoa don, tu dong sinh khi tao booking.
+**Mục tiêu:** Quản lý hóa đơn, tự động sinh khi tạo booking.
 
-**Endpoints:**
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| GET | `/api/invoices/my-invoices` | USER |
+| GET | `/api/invoices/{id}` | USER |
+| GET | `/api/admin/invoices` | ADMIN |
 
-| Method | Endpoint | Role |
-|--------|----------|------|
-| GET | /api/invoices/my-invoices | USER |
-| GET | /api/invoices/{id} | USER |
-| GET | /api/admin/invoices | ADMIN |
-
-**Invoice Status Flow:**
+**Invoice status flow**
 
 ```text
 UNPAID -> PAID   (payment SUCCESS)
-UNPAID -> FAILED (payment FAILED hoac auto-expire)
+UNPAID -> FAILED (payment FAILED hoặc auto-expire)
 ```
 
 ### Module 7 - Payment Management
 
-**Muc tieu:** ADMIN xac nhan thanh toan va cap nhat trang thai lien quan.
+**Mục tiêu:** ADMIN xác nhận thanh toán và cập nhật trạng thái liên quan.
 
-**Endpoints:**
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| GET | `/api/payments/my-payments` | USER |
+| GET | `/api/payments/{id}` | USER |
+| GET | `/api/admin/payments` | ADMIN |
+| PUT | `/api/admin/payments/confirm/{invoiceId}` | ADMIN |
 
-| Method | Endpoint | Role |
-|--------|----------|------|
-| GET | /api/payments/my-payments | USER |
-| GET | /api/payments/{id} | USER |
-| GET | /api/admin/payments | ADMIN |
-| PUT | /api/admin/payments/confirm/{invoiceId} | ADMIN |
-
-**Khi confirm SUCCESS:**
+**Khi confirm SUCCESS**
 
 ```text
 Payment -> SUCCESS
@@ -186,7 +177,7 @@ Booking -> COMPLETED
 Car     -> BOOKED
 ```
 
-**Khi confirm FAILED:**
+**Khi confirm FAILED**
 
 ```text
 Payment -> FAILED
@@ -203,8 +194,8 @@ Car     -> AVAILABLE
 
 ### Module 9 - Email Notification
 
-- Gui OTP reset password
-- Gui email async (`@Async`)
+- Gửi OTP reset mật khẩu
+- Gửi email bất đồng bộ (`@Async`)
 
 ### Module 10 - Monitoring & Observability
 
@@ -213,52 +204,52 @@ Car     -> AVAILABLE
 
 ---
 
-## Pagination
+## Phân trang
 
-Tat ca endpoint list ho tro:
+Tất cả endpoint dạng danh sách hỗ trợ:
 
-- `page` (default `0`)
-- `size` (default `10`, max `50`)
+- `page` (mặc định `0`)
+- `size` (mặc định `10`, tối đa `50`)
 
 ---
 
-## Business Flow hoan chinh
+## Luồng nghiệp vụ chính
 
 ```text
-1. USER dang ky / dang nhap
-   -> Nhan Access Token (15 phut) + Refresh Token (7 ngay)
+1. USER đăng ký / đăng nhập
+   -> Nhận Access Token (15 phút) + Refresh Token (7 ngày)
 
-2. USER xem danh sach xe available
+2. USER xem danh sách xe
    GET /api/cars
 
-3. USER xem lich xe truoc khi dat
+3. USER xem lịch xe trước khi đặt
    GET /api/cars/{id}/availability
 
-4. USER tao booking
+4. USER tạo booking
    POST /api/bookings
    -> Booking: PENDING
    -> Invoice: UNPAID
    -> Car: PENDING
 
-5. USER chuyen khoan theo thong tin hoa don (ngoai he thong)
+5. USER chuyển khoản theo thông tin hóa đơn (ngoài hệ thống)
 
-6. Scheduler auto-expire booking qua han thanh toan
-   Chay dinh ky theo `booking.expiration.cleanup-interval` (mac dinh 5m)
-   Neu qua `booking.expiration.pending-payment-timeout` (mac dinh 15m):
+6. Scheduler tự động expire booking quá hạn thanh toán
+   Chạy định kỳ theo `booking.expiration.cleanup-interval` (mặc định 5m)
+   Nếu quá `booking.expiration.pending-payment-timeout` (mặc định 15m):
    -> Booking: CANCELLED
    -> Invoice: FAILED
    -> Car: AVAILABLE
 
-7. ADMIN confirm payment
+7. ADMIN xác nhận payment
    PUT /api/admin/payments/confirm/{invoiceId}
 
-   Neu SUCCESS:
+   Nếu SUCCESS:
    -> Payment: SUCCESS
    -> Invoice: PAID
    -> Booking: COMPLETED
    -> Car: BOOKED
 
-   Neu FAILED:
+   Nếu FAILED:
    -> Payment: FAILED
    -> Invoice: FAILED
    -> Booking: CANCELLED
@@ -267,19 +258,19 @@ Tat ca endpoint list ho tro:
 
 ---
 
-## Main Entities
+## Entity chính
 
-| Entity | Mo ta |
+| Entity | Mô tả |
 |--------|-------|
-| User | Tai khoan nguoi dung |
-| Car | Thong tin xe cho thue |
-| Booking | Don dat xe |
-| Invoice | Hoa don thanh toan (1-1 voi Booking) |
-| Payment | Giao dich (1-1 voi Invoice) |
-| RefreshToken | Refresh token cua user |
-| PasswordResetToken | OTP dat lai mat khau |
+| User | Tài khoản người dùng |
+| Car | Thông tin xe cho thuê |
+| Booking | Đơn đặt xe |
+| Invoice | Hóa đơn thanh toán (1-1 với Booking) |
+| Payment | Giao dịch (1-1 với Invoice) |
+| RefreshToken | Refresh token của user |
+| PasswordResetToken | OTP đặt lại mật khẩu |
 
-**Relationships:**
+**Quan hệ**
 
 ```text
 User    1 ---- N Booking

@@ -4,7 +4,7 @@ import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.PageResponse;
 import com.kien.vehicle.booking.dto.response.PaymentResponse;
 import com.kien.vehicle.booking.dto.response.PaymentSummaryResponse;
-import com.kien.vehicle.booking.model.PaymentStatus;
+import com.kien.vehicle.booking.entity.enums.PaymentStatus;
 import com.kien.vehicle.booking.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -43,3 +43,4 @@ public class AdminPaymentController {
         return ResponseEntity.ok(new ApiResponse<>(true, message, payment));
     }
 }
+

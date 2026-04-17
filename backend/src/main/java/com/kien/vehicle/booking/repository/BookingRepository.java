@@ -1,7 +1,5 @@
 package com.kien.vehicle.booking.repository;
 
-import com.kien.vehicle.booking.model.Booking;
-import com.kien.vehicle.booking.model.BookingStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
+
+import com.kien.vehicle.booking.entity.Booking;
+import com.kien.vehicle.booking.entity.enums.BookingStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -56,3 +57,4 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("today") LocalDate today,
             @Param("statuses") List<BookingStatus> statuses);
 }
+

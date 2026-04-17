@@ -5,7 +5,10 @@ import com.kien.vehicle.booking.dto.request.CarUpdateRequest;
 import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
-import com.kien.vehicle.booking.model.CarStatus;
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -29,8 +32,8 @@ public interface CarService {
             String brand,
             String name,
             String location,
-            String transmission,
-            String fuelType,
+            Transmission transmission,
+            FuelType fuelType,
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<Integer> seats,

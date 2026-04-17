@@ -1,6 +1,6 @@
 package com.kien.vehicle.booking.service;
 
-import com.kien.vehicle.booking.model.User;
+import com.kien.vehicle.booking.entity.User;
 import com.kien.vehicle.booking.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

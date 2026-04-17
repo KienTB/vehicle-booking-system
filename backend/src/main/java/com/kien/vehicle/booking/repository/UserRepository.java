@@ -1,7 +1,8 @@
 package com.kien.vehicle.booking.repository;
 
-import com.kien.vehicle.booking.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.kien.vehicle.booking.entity.User;
 
 import java.util.Optional;
 

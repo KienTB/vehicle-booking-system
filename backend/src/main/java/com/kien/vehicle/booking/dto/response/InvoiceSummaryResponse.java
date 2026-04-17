@@ -1,10 +1,10 @@
 package com.kien.vehicle.booking.dto.response;
 
-import com.kien.vehicle.booking.model.InvoiceStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.kien.vehicle.booking.entity.enums.InvoiceStatus;
 
 public record InvoiceSummaryResponse(
         Long invoiceId,
@@ -18,3 +18,4 @@ public record InvoiceSummaryResponse(
         LocalDateTime createAt
 ) {
 }
+

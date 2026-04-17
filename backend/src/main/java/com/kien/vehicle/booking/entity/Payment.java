@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.model;
+package com.kien.vehicle.booking.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.kien.vehicle.booking.entity.enums.PaymentMethod;
+import com.kien.vehicle.booking.entity.enums.PaymentStatus;
 
 @Entity
 @Table (name = "payment")

@@ -1,10 +1,11 @@
 package com.kien.vehicle.booking.repository;
 
-import com.kien.vehicle.booking.model.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.kien.vehicle.booking.entity.PasswordResetToken;
 
 import java.util.Optional;
 

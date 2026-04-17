@@ -1,12 +1,15 @@
 package com.kien.vehicle.booking.repository;
 
-import com.kien.vehicle.booking.model.Car;
-import com.kien.vehicle.booking.model.CarStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.kien.vehicle.booking.entity.Car;
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,8 +30,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
     WHERE (:brand IS NULL OR LOWER(c.brand) LIKE LOWER(CONCAT('%', :brand, '%')))
       AND (:name IS NULL OR LOWER(c.name) LIKE LOWER(CONCAT('%', :name, '%')))
       AND (:location IS NULL OR LOWER(c.location) LIKE LOWER(CONCAT('%', :location, '%')))
-      AND (:transmission IS NULL OR LOWER(c.transmission) = LOWER(:transmission))
-      AND (:fuelType IS NULL OR LOWER(c.fuelType) = LOWER(:fuelType))
+      AND (:transmission IS NULL OR c.transmission = :transmission)
+      AND (:fuelType IS NULL OR c.fuelType = :fuelType)
       AND (:minPrice IS NULL OR c.pricePerDay >= :minPrice)
       AND (:maxPrice IS NULL OR c.pricePerDay <= :maxPrice)
       AND (:filterBySeats = false OR c.seats IN :seats)
@@ -38,8 +41,8 @@ public interface CarRepository extends JpaRepository<Car, Long> {
             @Param("brand")         String brand,
             @Param("name")          String name,
             @Param("location")      String location,
-            @Param("transmission")  String transmission,
-            @Param("fuelType")      String fuelType,
+            @Param("transmission")  Transmission transmission,
+            @Param("fuelType")      FuelType fuelType,
             @Param("minPrice")      BigDecimal minPrice,
             @Param("maxPrice")      BigDecimal maxPrice,
             @Param("filterBySeats") boolean filterBySeats,
@@ -48,3 +51,4 @@ public interface CarRepository extends JpaRepository<Car, Long> {
             Pageable pageable
     );
 }
+

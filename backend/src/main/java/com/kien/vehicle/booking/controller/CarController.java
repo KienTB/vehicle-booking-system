@@ -1,6 +1,8 @@
 package com.kien.vehicle.booking.controller;
 
 import com.kien.vehicle.booking.dto.response.*;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 import com.kien.vehicle.booking.service.CarService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,8 +29,8 @@ public class CarController {
             @RequestParam(required = false) String brand,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String location,
-            @RequestParam(required = false) String transmission,
-            @RequestParam(required = false) String fuelType,
+            @RequestParam(required = false) Transmission transmission,
+            @RequestParam(required = false) FuelType fuelType,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) List<Integer> seats,

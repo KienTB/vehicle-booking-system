@@ -1,9 +1,9 @@
 package com.kien.vehicle.booking.dto.response;
 
-import com.kien.vehicle.booking.model.BookingStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import com.kien.vehicle.booking.entity.enums.BookingStatus;
 
 public record BookingSummaryResponse(
         Long bookingId,
@@ -16,3 +16,4 @@ public record BookingSummaryResponse(
         BookingStatus status
 ) {
 }
+

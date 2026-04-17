@@ -5,12 +5,14 @@ import com.kien.vehicle.booking.dto.request.CarUpdateRequest;
 import com.kien.vehicle.booking.dto.response.CarAvailabilityResponse;
 import com.kien.vehicle.booking.dto.response.CarResponse;
 import com.kien.vehicle.booking.dto.response.CarSummaryResponse;
+import com.kien.vehicle.booking.entity.Booking;
+import com.kien.vehicle.booking.entity.Car;
+import com.kien.vehicle.booking.entity.enums.BookingStatus;
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 import com.kien.vehicle.booking.exception.AppException;
 import com.kien.vehicle.booking.exception.ErrorCode;
-import com.kien.vehicle.booking.model.Booking;
-import com.kien.vehicle.booking.model.BookingStatus;
-import com.kien.vehicle.booking.model.Car;
-import com.kien.vehicle.booking.model.CarStatus;
 import com.kien.vehicle.booking.repository.BookingRepository;
 import com.kien.vehicle.booking.repository.CarRepository;
 import com.kien.vehicle.booking.service.CarService;
@@ -25,6 +27,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,9 @@ import java.util.stream.Collectors;
 public class CarServiceImpl implements CarService {
 
     private static final Set<Integer> SUPPORTED_SEATS = Set.of(4, 5, 7, 8, 9);
+    private static final int DEFAULT_SEATS = 5;
+    private static final Transmission DEFAULT_TRANSMISSION = Transmission.AUTOMATIC;
+    private static final FuelType DEFAULT_FUEL_TYPE = FuelType.GASOLINE;
 
     private final CarRepository carRepository;
     private final BookingRepository bookingRepository;
@@ -53,9 +59,9 @@ public class CarServiceImpl implements CarService {
         car.setPricePerDay(request.pricePerDay());
         car.setStatus(request.carStatus() != null ? request.carStatus() : CarStatus.AVAILABLE);
         car.setImageUrl(request.imageUrl());
-        car.setSeats(request.seats() != null ? request.seats() : 5);
-        car.setTransmission(request.transmission() != null ? request.transmission() : "Automatic");
-        car.setFuelType(request.fuelType() != null ? request.fuelType() : "Gasoline");
+        car.setSeats(Objects.requireNonNullElse(request.seats(), DEFAULT_SEATS));
+        car.setTransmission(Objects.requireNonNullElse(request.transmission(), DEFAULT_TRANSMISSION));
+        car.setFuelType(Objects.requireNonNullElse(request.fuelType(), DEFAULT_FUEL_TYPE));
         car.setLocation(request.location());
 
         Car saved = carRepository.save(car);
@@ -124,8 +130,8 @@ public class CarServiceImpl implements CarService {
             String brand,
             String name,
             String location,
-            String transmission,
-            String fuelType,
+            Transmission transmission,
+            FuelType fuelType,
             BigDecimal minPrice,
             BigDecimal maxPrice,
             List<Integer> seats,
@@ -141,8 +147,8 @@ public class CarServiceImpl implements CarService {
                         normalizeText(brand),
                         normalizeText(name),
                         normalizeText(location),
-                        normalizeText(transmission),
-                        normalizeText(fuelType),
+                        transmission,
+                        fuelType,
                         minPrice,
                         maxPrice,
                         filterBySeats,
@@ -241,3 +247,4 @@ public class CarServiceImpl implements CarService {
         }
     }
 }
+

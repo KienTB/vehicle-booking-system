@@ -2,11 +2,11 @@ package com.kien.vehicle.booking.service.impl;
 
 import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceSummaryResponse;
+import com.kien.vehicle.booking.entity.Booking;
+import com.kien.vehicle.booking.entity.Invoice;
+import com.kien.vehicle.booking.entity.enums.BookingStatus;
+import com.kien.vehicle.booking.entity.enums.InvoiceStatus;
 import com.kien.vehicle.booking.exception.*;
-import com.kien.vehicle.booking.model.Booking;
-import com.kien.vehicle.booking.model.BookingStatus;
-import com.kien.vehicle.booking.model.Invoice;
-import com.kien.vehicle.booking.model.InvoiceStatus;
 import com.kien.vehicle.booking.repository.InvoiceRepository;
 import com.kien.vehicle.booking.repository.UserRepository;
 import com.kien.vehicle.booking.service.InvoiceService;
@@ -121,3 +121,4 @@ public class InvoiceServiceImpl implements InvoiceService {
         );
     }
 }
+

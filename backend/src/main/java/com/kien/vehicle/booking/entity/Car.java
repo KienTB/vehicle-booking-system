@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.model;
+package com.kien.vehicle.booking.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,6 +8,10 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.kien.vehicle.booking.entity.enums.CarStatus;
+import com.kien.vehicle.booking.entity.enums.FuelType;
+import com.kien.vehicle.booking.entity.enums.Transmission;
 
 @Entity
 @Table(name = "car")
@@ -50,11 +54,13 @@ public class Car {
     @Column(name = "seats")
     private Integer seats = 5;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "transmission")
-    private String transmission = "Automatic";
+    private Transmission transmission = Transmission.AUTOMATIC;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "fuel_type")
-    private String fuelType = "Gasoline";
+    private FuelType fuelType = FuelType.GASOLINE;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();

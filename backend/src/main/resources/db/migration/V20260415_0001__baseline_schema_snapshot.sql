@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `car` (
   `car_id` BIGINT NOT NULL AUTO_INCREMENT,
   `brand` VARCHAR(255) DEFAULT NULL,
   `created_at` DATETIME(6) DEFAULT NULL,
-  `fuel_type` VARCHAR(255) DEFAULT NULL,
+  `fuel_type` ENUM('GASOLINE','DIESEL','ELECTRIC','HYBRID') NOT NULL DEFAULT 'GASOLINE',
   `image_url` VARCHAR(255) DEFAULT NULL,
   `license_plate` VARCHAR(255) DEFAULT NULL,
   `location` VARCHAR(255) DEFAULT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `car` (
   `price_per_day` DECIMAL(12,2) DEFAULT NULL,
   `seats` INT DEFAULT NULL,
   `status` ENUM('AVAILABLE','PENDING','BOOKED','MAINTENANCE','DISABLED') DEFAULT NULL,
-  `transmission` VARCHAR(255) DEFAULT NULL,
+  `transmission` ENUM('AUTOMATIC','MANUAL') NOT NULL DEFAULT 'AUTOMATIC',
   `updated_at` DATETIME(6) DEFAULT NULL,
   PRIMARY KEY (`car_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -97,5 +97,3 @@ CREATE TABLE IF NOT EXISTS `password_reset_token` (
   CONSTRAINT `FK83nsrttkwkb6ym0anu051mtxn` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE INDEX idx_booking_status_created_at ON booking (status, created_at);
-CREATE INDEX idx_invoice_status_booking_id ON invoice (status, booking_id);

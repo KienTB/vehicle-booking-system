@@ -4,7 +4,7 @@ import com.kien.vehicle.booking.dto.response.ApiResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceResponse;
 import com.kien.vehicle.booking.dto.response.InvoiceSummaryResponse;
 import com.kien.vehicle.booking.dto.response.PageResponse;
-import com.kien.vehicle.booking.model.InvoiceStatus;
+import com.kien.vehicle.booking.entity.enums.InvoiceStatus;
 import com.kien.vehicle.booking.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -41,3 +41,4 @@ public class AdminInvoiceController {
                 PageResponse.of(invoiceService.getAllInvoices(invoiceStatus, pageable))));
     }
 }
+

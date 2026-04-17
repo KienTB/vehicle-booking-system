@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.model;
+package com.kien.vehicle.booking.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.cglib.core.Local;
+
+import com.kien.vehicle.booking.entity.enums.InvoiceStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

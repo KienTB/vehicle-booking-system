@@ -1,10 +1,10 @@
 package com.kien.vehicle.booking.service.impl;
 
-import com.kien.vehicle.booking.model.Booking;
-import com.kien.vehicle.booking.model.Car;
-import com.kien.vehicle.booking.model.Payment;
-import com.kien.vehicle.booking.model.PaymentStatus;
-import com.kien.vehicle.booking.model.User;
+import com.kien.vehicle.booking.entity.Booking;
+import com.kien.vehicle.booking.entity.Car;
+import com.kien.vehicle.booking.entity.Payment;
+import com.kien.vehicle.booking.entity.User;
+import com.kien.vehicle.booking.entity.enums.PaymentStatus;
 import com.kien.vehicle.booking.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

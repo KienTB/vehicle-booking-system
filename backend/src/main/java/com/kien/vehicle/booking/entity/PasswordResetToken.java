@@ -1,4 +1,4 @@
-package com.kien.vehicle.booking.model;
+package com.kien.vehicle.booking.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
