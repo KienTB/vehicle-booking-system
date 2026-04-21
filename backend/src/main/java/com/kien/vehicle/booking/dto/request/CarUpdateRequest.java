@@ -13,7 +13,6 @@ public record CarUpdateRequest(
         String licensePlate,
         BigDecimal pricePerDay,
         CarStatus status,
-        String imageUrl,
         Integer seats,
         Transmission transmission,
         FuelType fuelType,

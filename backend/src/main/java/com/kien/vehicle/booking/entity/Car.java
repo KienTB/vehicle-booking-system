@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.kien.vehicle.booking.entity.enums.CarStatus;
 import com.kien.vehicle.booking.entity.enums.FuelType;
@@ -45,9 +47,6 @@ public class Car {
     @Column(name = "status")
     private CarStatus status;
 
-    @Column(name = "image_url")
-    private String imageUrl;
-
     @Column(name = "location")
     private String location;
 
@@ -67,6 +66,9 @@ public class Car {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
+
+    @OneToMany(mappedBy = "car", fetch = FetchType.LAZY)
+    private List<CarImage> images = new ArrayList<>();
 
     @PreUpdate
     public void preUpdate() {

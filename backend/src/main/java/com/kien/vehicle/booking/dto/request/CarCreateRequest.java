@@ -13,7 +13,6 @@ public record CarCreateRequest(
         String licensePlate,
         BigDecimal pricePerDay,
         CarStatus carStatus,
-        String imageUrl,
         Integer seats,
         Transmission transmission,
         FuelType fuelType,

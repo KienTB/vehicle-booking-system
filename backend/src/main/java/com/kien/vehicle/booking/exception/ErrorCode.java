@@ -100,13 +100,33 @@ public enum ErrorCode {
     ),
     CAR_FILTER_INVALID_PRICE_RANGE(
             "CAR_FILTER_INVALID_PRICE_RANGE",
-            "Khoang gia khong hop le. minPrice phai <= maxPrice va khong am.",
+            "Khoảng giá không hợp lệ. minPrice phải <= maxPrice và không âm.",
             HttpStatus.BAD_REQUEST
     ),
-    CAR_FILTER_INVALID_SEATS(
+        CAR_FILTER_INVALID_SEATS(
             "CAR_FILTER_INVALID_SEATS",
-            "Bo loc so cho khong hop le. Chi ho tro: 4, 5, 7, 8, 9.",
+            "Số chỗ không hợp lệ. Chỉ hỗ trợ: 4, 5, 7, 8, 9 chỗ.",
             HttpStatus.BAD_REQUEST
+    ),
+        CAR_IMAGE_LIMIT_EXCEEDED(
+            "CAR_IMAGE_LIMIT_EXCEEDED",
+            "Mỗi xe chỉ được tối đa 5 ảnh.",
+            HttpStatus.BAD_REQUEST
+    ),
+    CAR_IMAGE_INVALID_FILE_TYPE(
+            "CAR_IMAGE_INVALID_FILE_TYPE",
+            "Định dạng ảnh không hợp lệ. Chỉ hỗ trợ JPG, JPEG, PNG.",
+            HttpStatus.BAD_REQUEST
+    ),
+    CAR_IMAGE_UPLOAD_FAILED(
+            "CAR_IMAGE_UPLOAD_FAILED",
+            "Tải ảnh lên thất bại. Vui lòng thử lại.",
+            HttpStatus.INTERNAL_SERVER_ERROR
+    ),
+    CAR_IMAGE_NOT_FOUND(
+            "CAR_IMAGE_NOT_FOUND",
+            "Không tìm thấy ảnh xe với ID: %s.",
+            HttpStatus.NOT_FOUND
     ),
     BOOKING_NOT_FOUND(
             "BOOKING_NOT_FOUND",
@@ -206,6 +226,7 @@ public enum ErrorCode {
         return String.format(message, args);
     }
 }
+
 
 
 

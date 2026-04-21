@@ -106,6 +106,28 @@ MAINTENANCE -> Xe đang bảo dưỡng
 DISABLED    -> Xe đã bị vô hiệu hóa (soft delete)
 ```
 
+### Module 4.1 - Car Image Management (Cloudinary)
+
+**Mục tiêu:** Quản lý nhiều ảnh cho mỗi xe, tách riêng khỏi `Car`, và đồng bộ quy tắc ảnh đại diện.
+
+| Method | Endpoint | Quyền |
+|--------|----------|-------|
+| POST | `/api/admin/cars/{carId}/images` | ADMIN |
+| GET | `/api/admin/cars/{carId}/images` | ADMIN |
+| GET | `/api/admin/cars/{carId}/images/primary` | ADMIN |
+| PATCH | `/api/admin/cars/{carId}/images/{carImageId}/primary` | ADMIN |
+| GET | `/api/cars/{carId}/images` | USER |
+| GET | `/api/cars/{carId}/images/primary` | USER |
+
+**Business rules**
+
+- Chỉ ADMIN được upload ảnh (hiện tại).
+- Chỉ chấp nhận `jpg/jpeg/png`.
+- Mỗi xe tối đa 5 ảnh.
+- Ảnh đầu tiên tự động là primary.
+- Upload ảnh mới giữ lại ảnh cũ.
+- Đổi primary bằng endpoint PATCH riêng.
+
 ### Module 5 - Booking Management
 
 **Mục tiêu:** USER tạo/xem/hủy booking, ADMIN xem/hủy booking.
@@ -264,6 +286,7 @@ Tất cả endpoint dạng danh sách hỗ trợ:
 |--------|-------|
 | User | Tài khoản người dùng |
 | Car | Thông tin xe cho thuê |
+| CarImage | Danh sách ảnh của xe, bao gồm ảnh primary |
 | Booking | Đơn đặt xe |
 | Invoice | Hóa đơn thanh toán (1-1 với Booking) |
 | Payment | Giao dịch (1-1 với Invoice) |
@@ -275,8 +298,11 @@ Tất cả endpoint dạng danh sách hỗ trợ:
 ```text
 User    1 ---- N Booking
 Car     1 ---- N Booking
+Car     1 ---- N CarImage
 Booking 1 ---- 1 Invoice
 Invoice 1 ---- 1 Payment
 User    1 ---- 1 RefreshToken
 User    1 ---- 1 PasswordResetToken
 ```
+
+
