@@ -1,0 +1,139 @@
+:root {
+  --font-family-primary: 'Be Vietnam Pro', Manrope, Inter, -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.15;
+  --line-height-heading: 1.2;
+  --line-height-base: 1.5;
+  --line-height-loose: 1.7;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 2.625rem;
+  --font-size-hero: 3.5rem;
+  --font-size-display: 4rem;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 2.5rem;
+  --space-9: 3rem;
+  --space-10: 4rem;
+  --space-11: 5rem;
+  --space-12: 6rem;
+
+  --radius-xs: 0.5rem;
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-xl: 2rem;
+  --radius-pill: 999px;
+
+  --motion-instant: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-normal: 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-slow: 480ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  --color-brand-primary: #da291c;
+  --color-brand-primary-hover: #b01e0a;
+  --color-brand-primary-active: #9d2211;
+  --color-brand-primary-soft: color-mix(in srgb, #da291c 9%, #ffffff);
+  --color-brand-secondary: #000000;
+  --color-brand-accent: #fff200;
+  --color-brand-accent-warm: #f6e500;
+  --color-surface-black: #000000;
+  --color-surface-dark: #303030;
+  --color-surface-base: #ffffff;
+  --color-surface-page: #ffffff;
+  --color-surface-card: #ffffff;
+  --color-surface-muted: #d2d2d2;
+  --color-surface-soft: color-mix(in srgb, #d2d2d2 24%, #ffffff);
+  --color-surface-soft-hover: color-mix(in srgb, #d2d2d2 36%, #ffffff);
+  --color-surface-hero: #000000;
+  --color-surface-overlay: hsla(0, 0%, 7%, 0.8);
+  --color-surface-raised: var(--color-brand-primary);
+  --color-text-primary: #181818;
+  --color-text-secondary: #666666;
+  --color-text-tertiary: #8f8f8f;
+  --color-text-placeholder: #969696;
+  --color-text-muted: #8f8f8f;
+  --color-text-inverse: #ffffff;
+  --color-text-brand: #da291c;
+  --color-text-success: #03904a;
+  --color-border: #d2d2d2;
+  --color-border-subtle: #d2d2d2;
+  --color-border-default: #cccccc;
+  --color-border-dark: #303030;
+  --color-border-inverse: #ffffff;
+  --color-border-strong: #303030;
+  --color-border-focus: #da291c;
+  --color-danger: #f13a2c;
+  --color-state-error: #f13a2c;
+  --color-state-warning: #f6e500;
+  --color-state-success: #03904a;
+  --color-state-info: #4c98b9;
+  --color-state-link-hover: #3860be;
+  --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.1);
+  --shadow-hover: 0 20px 48px rgba(15, 23, 42, 0.12);
+  --shadow-cinematic: 0 24px 80px rgba(2, 6, 23, 0.28);
+  --shadow-panel: var(--shadow-lg);
+
+  color: var(--color-text-secondary);
+  background: var(--color-surface-page);
+  font-family: var(--font-family-primary);
+  font-size: 16px;
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-base);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-surface-page);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100svh;
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 3px;
+}
+
+#root {
+  min-height: 100svh;
+}
