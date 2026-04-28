@@ -1,0 +1,37 @@
+@import './HomePage.css';
+
+.customer-home__hero .home-hero__backdrop::before {
+  opacity: 0.28;
+}
+
+.customer-home__actions {
+  flex-wrap: wrap;
+}
+
+.customer-home__content h1 {
+  max-width: 16ch;
+}
+
+.customer-home__search .home-search__submit {
+  min-height: 100%;
+}
+
+.customer-home__intro a {
+  color: var(--color-brand-primary);
+}
+
+.customer-home__intro a:hover {
+  color: var(--color-brand-primary-hover);
+}
+
+@media (max-width: 1080px) {
+  .customer-home__actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 680px) {
+  .customer-home__actions {
+    width: 100%;
+  }
+}

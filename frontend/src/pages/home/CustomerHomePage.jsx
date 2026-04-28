@@ -1,6 +1,7 @@
-import './HomePage.css'
+import { clearAuthStorage, getAuthUser } from '../../auth/authStorage'
+import './CustomerHomePage.css'
 
-const featuredCars = [
+const suggestedCars = [
   {
     id: 1,
     name: 'Toyota Vios 2023',
@@ -27,16 +28,19 @@ const featuredCars = [
   },
 ]
 
-const serviceNotes = [
-  'Xe được kiểm định trước khi giao',
-  'Giá thuê rõ ràng theo từng ngày',
-  'Hỗ trợ nhanh khi thay đổi lịch trình',
-]
+export function CustomerHomePage() {
+  const user = getAuthUser()
+  const userName = user?.name?.trim() || user?.phone || 'bạn'
 
-export function HomePage() {
+  function handleLogout(event) {
+    event.preventDefault()
+    clearAuthStorage()
+    window.location.href = '/home'
+  }
+
   return (
-    <main className="home-page">
-      <section className="home-hero" aria-labelledby="home-title">
+    <main className="home-page customer-home">
+      <section className="home-hero customer-home__hero" aria-labelledby="customer-home-title">
         <div className="home-hero__backdrop" aria-hidden="true" />
         <div className="home-hero__overlay" aria-hidden="true" />
 
@@ -47,32 +51,36 @@ export function HomePage() {
           </a>
 
           <nav className="home-nav__links" aria-label="Điều hướng chính">
-            <a href="/" aria-current="page">
-              Trang chủ
+            <a href="/dashboard" aria-current="page">
+              Trang của tôi
             </a>
             <a href="/cars">Danh sách xe</a>
             <a href="/my-bookings">Đặt xe của tôi</a>
+            <a href="/invoices">Hóa đơn</a>
           </nav>
 
-          <div className="home-nav__actions">
-            <a className="home-button home-button--secondary" href="/login">
-              Đăng nhập
+          <div className="home-nav__actions customer-home__actions">
+            <a className="home-button home-button--secondary" href="/my-bookings">
+              Đặt xe của tôi
             </a>
-            <a className="home-button home-button--primary" href="/register">
-              Tạo tài khoản
+            <a className="home-button home-button--secondary" href="/profile">
+              Hồ sơ
+            </a>
+            <a className="home-button home-button--primary" href="/home" onClick={handleLogout}>
+              Đăng xuất
             </a>
           </div>
         </header>
 
-        <div className="home-hero__content">
-          <p className="home-eyebrow">Nền tảng đặt xe tự lái</p>
-          <h1 id="home-title">Thuê xe phù hợp với lịch trình của bạn trong vài bước.</h1>
+        <div className="home-hero__content customer-home__content">
+          <p className="home-eyebrow">Xin chào, {userName}</p>
+          <h1 id="customer-home-title">Tiếp tục chọn xe cho lịch trình tiếp theo của bạn.</h1>
           <p className="home-hero__summary">
-            Tìm xe theo địa điểm, thời gian, nhu cầu sử dụng và mức chi phí mong muốn.
-            Trải nghiệm đặt xe được giữ rõ ràng để bạn quyết định nhanh và yên tâm hơn.
+            Tìm xe nhanh theo điểm nhận, thời gian và nhu cầu sử dụng. Bạn có thể theo dõi
+            booking, hóa đơn và hồ sơ ngay trong cùng một không gian.
           </p>
 
-          <form className="home-search" aria-label="Tìm kiếm xe thuê">
+          <form className="home-search customer-home__search" aria-label="Tìm xe nhanh">
             <label>
               <span>Địa điểm nhận xe</span>
               <input type="text" placeholder="Thành phố hoặc quận" />
@@ -137,21 +145,23 @@ export function HomePage() {
             </label>
 
             <a className="home-search__submit" href="/cars">
-              Tìm xe
+              Tiếp tục tìm xe
             </a>
           </form>
         </div>
       </section>
 
-      <section className="home-flow" aria-label="Gợi ý xe và lợi ích dịch vụ">
-        <div className="home-flow__intro">
-          <p className="home-eyebrow">Gợi ý hôm nay</p>
-          <h2>Những lựa chọn dễ bắt đầu cho chuyến đi sắp tới.</h2>
-          <a href="/cars">Xem tất cả xe</a>
+      <section className="home-flow customer-home__main">
+        <div className="home-flow__intro customer-home__intro">
+          <div>
+            <p className="home-eyebrow">Gợi ý cho bạn</p>
+            <h2>Xe phù hợp để bạn đặt nhanh trong hôm nay.</h2>
+          </div>
+          <a href="/my-bookings">Xem tất cả đơn đặt xe</a>
         </div>
 
-        <div className="home-cars">
-          {featuredCars.map((car) => (
+        <div className="home-cars customer-home__cars">
+          {suggestedCars.map((car) => (
             <article className="home-car" key={car.id}>
               <a className="home-car__media" href={`/cars/${car.id}`}>
                 <img src="/background.png" alt={`Hình ảnh ${car.name}`} />
@@ -174,55 +184,7 @@ export function HomePage() {
             </article>
           ))}
         </div>
-
       </section>
-
-      <footer className="home-footer" aria-label="Điều hướng và hỗ trợ cuối trang">
-        <div className="home-footer__trust">
-          {serviceNotes.map((note) => (
-            <p key={note}>{note}</p>
-          ))}
-        </div>
-
-        <div className="home-footer__main">
-          <div className="home-footer__brand">
-            <a href="/" aria-label="Carento">
-              <img src="/logo.png" alt="" aria-hidden="true" />
-              <strong>Carento</strong>
-            </a>
-            <p>Thuê xe tự lái linh hoạt, rõ ràng và đáng tin cậy cho mọi hành trình.</p>
-          </div>
-
-          <nav className="home-footer__nav" aria-label="Điều hướng nhanh">
-            <h3>Điều hướng nhanh</h3>
-            <a href="/">Trang chủ</a>
-            <a href="/cars">Danh sách xe</a>
-            <a href="/my-bookings">Đặt xe của tôi</a>
-            <a href="/login">Đăng nhập / Tạo tài khoản</a>
-          </nav>
-
-          <section className="home-footer__support" aria-label="Hỗ trợ khách hàng">
-            <h3>Hỗ trợ khách hàng</h3>
-            <a href="tel:19001234">Hotline: 1900 1234</a>
-            <a href="mailto:hotro@carento.vn">Email: hotro@carento.vn</a>
-            <div className="home-footer__social" aria-label="Kết nối Carento">
-              <a href="#" aria-label="Facebook Carento">
-                Fb
-              </a>
-              <a href="#" aria-label="Instagram Carento">
-                Ig
-              </a>
-              <a href="#" aria-label="Zalo Carento">
-                Zl
-              </a>
-            </div>
-          </section>
-        </div>
-
-        <div className="home-footer__bottom">
-          <small>© 2026 Carento. Trải nghiệm thuê xe tự lái theo cách của bạn.</small>
-        </div>
-      </footer>
     </main>
   )
 }

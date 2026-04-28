@@ -55,6 +55,15 @@ export function ChangePasswordPage() {
         </div>
       </div>
 
+      <div className="auth-otp-intro">
+        <p className="auth-otp-intro__eyebrow">Bảo mật tài khoản</p>
+        <h2 className="auth-otp-intro__heading">Đặt mật khẩu mới</h2>
+        <p className="auth-otp-intro__sub">
+          Tạo mật khẩu mạnh để bảo vệ tài khoản. Mật khẩu nên có ít nhất
+          8 ký tự, bao gồm chữ và số.
+        </p>
+      </div>
+
       <form className="auth-form" onSubmit={handleSubmit}>
         <div className="auth-form__group">
           <label className="auth-form__label" htmlFor="change-new-password">

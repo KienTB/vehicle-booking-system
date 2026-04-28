@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { authApi } from '../../api/authApi'
 import { AuthFieldIcon } from '../../components/auth/AuthFieldIcon'
+import { saveAuthSession } from '../../auth/authStorage'
 import './AuthForm.css'
 
 const initialValues = {
@@ -11,7 +13,9 @@ const initialValues = {
 export function LoginPage() {
   const [values, setValues] = useState(initialValues)
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [formMessage, setFormMessage] = useState('')
+  const [isError, setIsError] = useState(false)
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target
@@ -22,9 +26,48 @@ export function LoginPage() {
     }))
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setFormMessage('Sẵn sàng kết nối API đăng nhập ở bước tích hợp.')
+    setFormMessage('')
+    setIsError(false)
+    setIsLoading(true)
+
+    try {
+      const payload = await authApi.login({
+        phone: values.phone.trim(),
+        password: values.password,
+      })
+
+      if (!payload?.success || !payload?.data?.token) {
+        throw new Error(payload?.message || 'Đăng nhập thất bại')
+      }
+
+      saveAuthSession(payload.data, values.remember)
+      setFormMessage('Đăng nhập thành công. Đang chuyển trang...')
+      window.location.href = '/dashboard'
+    } catch (error) {
+      const backendMessage = error?.response?.data?.message
+      const statusCode = error?.response?.status
+      const networkCode = error?.code
+      let message = 'Đăng nhập thất bại. Vui lòng thử lại.'
+
+      if (statusCode === 401 || statusCode === 403) {
+        message = 'Sai số điện thoại hoặc mật khẩu.'
+      } else if (statusCode === 404) {
+        message = 'Không tìm thấy API đăng nhập. Vui lòng kiểm tra backend hoặc cấu hình proxy.'
+      } else if (statusCode === 429) {
+        message = 'Bạn thao tác quá nhanh. Vui lòng thử lại sau ít phút.'
+      } else if (networkCode === 'ERR_NETWORK') {
+        message = 'Không thể kết nối backend. Vui lòng bật server backend.'
+      } else if (typeof backendMessage === 'string' && backendMessage.trim()) {
+        message = backendMessage
+      }
+
+      setIsError(true)
+      setFormMessage(message)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -52,6 +95,7 @@ export function LoginPage() {
               placeholder="Nhập số điện thoại"
               value={values.phone}
               onChange={handleChange}
+              disabled={isLoading}
               required
             />
           </div>
@@ -78,6 +122,7 @@ export function LoginPage() {
               placeholder="Nhập mật khẩu"
               value={values.password}
               onChange={handleChange}
+              disabled={isLoading}
               required
             />
             <button
@@ -85,6 +130,7 @@ export function LoginPage() {
               type="button"
               onClick={() => setShowPassword((currentValue) => !currentValue)}
               aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+              disabled={isLoading}
             >
               {showPassword ? 'Ẩn' : 'Hiện'}
             </button>
@@ -97,16 +143,21 @@ export function LoginPage() {
             type="checkbox"
             checked={values.remember}
             onChange={handleChange}
+            disabled={isLoading}
           />
           <span>Ghi nhớ đăng nhập</span>
         </label>
 
-        <button className="auth-form__submit" type="submit">
-          Đăng nhập
+        <button className="auth-form__submit" type="submit" disabled={isLoading}>
+          {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
         </button>
 
         {formMessage ? (
-          <p className="auth-form__message" role="status">
+          <p
+            className={`auth-form__message${isError ? ' auth-form__message--error' : ''}`}
+            role="status"
+            aria-live="polite"
+          >
             {formMessage}
           </p>
         ) : null}

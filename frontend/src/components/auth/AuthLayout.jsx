@@ -4,6 +4,7 @@ export function AuthLayout({
   eyebrow = 'Đặt xe cùng Carento',
   title,
   description,
+  hideIntro = false,
   children,
 }) {
   return (
@@ -30,10 +31,12 @@ export function AuthLayout({
           </div>
 
           <div className="auth-shell__panel">
-            <div className="auth-shell__intro">
-              <h2 id="auth-title">{title}</h2>
-              <p>{description}</p>
-            </div>
+            {!hideIntro && (title || description) && (
+              <div className="auth-shell__intro">
+                <h2 id="auth-title">{title}</h2>
+                <p>{description}</p>
+              </div>
+            )}
             {children}
           </div>
         </div>

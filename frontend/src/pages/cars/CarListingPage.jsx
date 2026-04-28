@@ -186,9 +186,7 @@ export function CarListingPage() {
       } catch (error) {
         if (error.name !== 'AbortError') {
           setCars(fallbackCars)
-          setNotice(
-            'Đang hiển thị dữ liệu mẫu vì chưa kết nối được danh sách xe từ hệ thống.'
-          )
+          setNotice('Đang hiển thị dữ liệu mẫu vì chưa kết nối được danh sách xe từ hệ thống.')
         }
       } finally {
         setIsLoading(false)
@@ -220,167 +218,168 @@ export function CarListingPage() {
   }
 
   return (
-    <main className="site-page cars-page">
-      <header className="site-nav">
-        <a className="site-nav__brand" href="/" aria-label="Carento">
-          <img src="/logo.png" alt="" aria-hidden="true" />
-          <span>Carento</span>
-        </a>
+    <main className="cars-page">
+      <section className="cars-hero" aria-labelledby="cars-title">
+        <div className="cars-hero__backdrop" aria-hidden="true" />
+        <div className="cars-hero__overlay" aria-hidden="true" />
 
-        <nav className="site-nav__links" aria-label="Điều hướng chính">
-          <a href="/">Trang chủ</a>
-          <a href="/cars" aria-current="page">
-            Danh sách xe
+        <header className="cars-nav">
+          <a className="cars-nav__brand" href="/" aria-label="Carento">
+            <img src="/logo.png" alt="" aria-hidden="true" />
+            <span>Carento</span>
           </a>
-          <a href="/my-bookings">Đặt xe của tôi</a>
-        </nav>
 
-        <div className="site-nav__actions">
-          <a className="site-button site-button--ghost" href="/login">
-            Đăng nhập
-          </a>
-          <a className="site-button site-button--primary" href="/register">
-            Tạo tài khoản
-          </a>
-        </div>
-      </header>
+          <nav className="cars-nav__links" aria-label="Điều hướng chính">
+            <a href="/">Trang chủ</a>
+            <a href="/cars" aria-current="page">
+              Danh sách xe
+            </a>
+            <a href="/my-bookings">Đặt xe của tôi</a>
+          </nav>
 
-      <section className="site-hero cars-hero">
-        <div className="site-hero__content">
-          <p className="site-eyebrow">Danh sách xe thuê</p>
-          <h1>Tìm chiếc xe phù hợp cho lịch trình của bạn.</h1>
-          <p>
-            Lọc theo địa điểm, ngày thuê và nhu cầu di chuyển để chọn xe nhanh
-            hơn, rõ ràng hơn.
-          </p>
-        </div>
-
-        <form className="site-search cars-search" onSubmit={handleSubmit}>
-          <label>
-            <span>Địa điểm</span>
-            <input
-              name="location"
-              type="text"
-              placeholder="Nhập thành phố hoặc quận"
-              value={filters.location}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            <span>Ngày nhận xe</span>
-            <input
-              name="pickupDate"
-              type="date"
-              value={filters.pickupDate}
-              onChange={handleChange}
-            />
-          </label>
-
-          <label>
-            <span>Ngày trả xe</span>
-            <input
-              name="returnDate"
-              type="date"
-              value={filters.returnDate}
-              onChange={handleChange}
-            />
-          </label>
-
-          <button className="site-search__button" type="submit">
-            Tìm xe
-          </button>
-
-          <div className="cars-search__more">
-            <label>
-              <span>Số chỗ</span>
-              <select name="seats" value={filters.seats} onChange={handleChange}>
-                <option value="">Tất cả</option>
-                <option value="4">4 chỗ</option>
-                <option value="5">5 chỗ</option>
-                <option value="7">7 chỗ</option>
-                <option value="8">8 chỗ</option>
-                <option value="9">9 chỗ</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Giá từ</span>
-              <input
-                name="minPrice"
-                type="number"
-                min="0"
-                placeholder="Tối thiểu"
-                value={filters.minPrice}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              <span>Giá đến</span>
-              <input
-                name="maxPrice"
-                type="number"
-                min="0"
-                placeholder="Tối đa"
-                value={filters.maxPrice}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              <span>Hãng xe</span>
-              <input
-                name="brand"
-                type="text"
-                placeholder="Toyota, Mazda..."
-                value={filters.brand}
-                onChange={handleChange}
-              />
-            </label>
-
-            <label>
-              <span>Nhiên liệu</span>
-              <select
-                name="fuelType"
-                value={filters.fuelType}
-                onChange={handleChange}
-              >
-                <option value="">Tất cả</option>
-                <option value="GASOLINE">Xăng</option>
-                <option value="DIESEL">Dầu</option>
-                <option value="ELECTRIC">Điện</option>
-                <option value="HYBRID">Hybrid</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Hộp số</span>
-              <select
-                name="transmission"
-                value={filters.transmission}
-                onChange={handleChange}
-              >
-                <option value="">Tất cả</option>
-                <option value="AUTOMATIC">Tự động</option>
-                <option value="MANUAL">Số sàn</option>
-              </select>
-            </label>
-
-            <button className="cars-search__reset" type="button" onClick={handleReset}>
-              Xóa lọc
-            </button>
+          <div className="cars-nav__actions">
+            <a className="cars-button cars-button--secondary" href="/login">
+              Đăng nhập
+            </a>
+            <a className="cars-button cars-button--primary" href="/register">
+              Tạo tài khoản
+            </a>
           </div>
-        </form>
+        </header>
+
+        <div className="cars-hero__content">
+          <p className="cars-eyebrow">Danh sách xe thuê</p>
+          <h1 id="cars-title">Khám phá mẫu xe phù hợp cho lịch trình của bạn.</h1>
+          <p>
+            Chọn theo địa điểm, thời gian, ngân sách và nhu cầu sử dụng. Mỗi lựa chọn đều ưu
+            tiên rõ ràng về giá và thông tin vận hành.
+          </p>
+
+          <form className="cars-filter" onSubmit={handleSubmit} aria-label="Bộ lọc xe thuê">
+            <div className="cars-filter__main">
+              <label>
+                <span>Địa điểm nhận xe</span>
+                <input
+                  name="location"
+                  type="text"
+                  placeholder="Thành phố hoặc quận"
+                  value={filters.location}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Ngày nhận xe</span>
+                <input
+                  name="pickupDate"
+                  type="date"
+                  value={filters.pickupDate}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Ngày trả xe</span>
+                <input
+                  name="returnDate"
+                  type="date"
+                  value={filters.returnDate}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <button className="cars-filter__submit" type="submit">
+                Tìm xe
+              </button>
+            </div>
+
+            <div className="cars-filter__advanced">
+              <label>
+                <span>Số chỗ</span>
+                <select name="seats" value={filters.seats} onChange={handleChange}>
+                  <option value="">Tất cả</option>
+                  <option value="4">4 chỗ</option>
+                  <option value="5">5 chỗ</option>
+                  <option value="7">7 chỗ</option>
+                  <option value="8">8 chỗ</option>
+                  <option value="9">9 chỗ</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Giá từ</span>
+                <input
+                  name="minPrice"
+                  type="number"
+                  min="0"
+                  placeholder="Tối thiểu"
+                  value={filters.minPrice}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Giá đến</span>
+                <input
+                  name="maxPrice"
+                  type="number"
+                  min="0"
+                  placeholder="Tối đa"
+                  value={filters.maxPrice}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Hãng xe</span>
+                <input
+                  name="brand"
+                  type="text"
+                  placeholder="Toyota, Mazda, VinFast..."
+                  value={filters.brand}
+                  onChange={handleChange}
+                />
+              </label>
+
+              <label>
+                <span>Nhiên liệu</span>
+                <select name="fuelType" value={filters.fuelType} onChange={handleChange}>
+                  <option value="">Tất cả</option>
+                  <option value="GASOLINE">Xăng</option>
+                  <option value="DIESEL">Dầu</option>
+                  <option value="ELECTRIC">Điện</option>
+                  <option value="HYBRID">Hybrid</option>
+                </select>
+              </label>
+
+              <label>
+                <span>Hộp số</span>
+                <select
+                  name="transmission"
+                  value={filters.transmission}
+                  onChange={handleChange}
+                >
+                  <option value="">Tất cả</option>
+                  <option value="AUTOMATIC">Tự động</option>
+                  <option value="MANUAL">Số sàn</option>
+                </select>
+              </label>
+
+              <button className="cars-filter__reset" type="button" onClick={handleReset}>
+                Xóa lọc
+              </button>
+            </div>
+          </form>
+        </div>
       </section>
 
-      <section className="site-section cars-results" aria-live="polite">
+      <section className="cars-results" aria-live="polite">
         <div className="cars-results__header">
           <div>
-            <p className="site-eyebrow">Xe sẵn sàng</p>
+            <p className="cars-eyebrow">Xe sẵn sàng</p>
             <h2>{resultLabel}</h2>
           </div>
-          <span>{notice || 'Giá hiển thị theo ngày thuê.'}</span>
+          <span>{notice || 'Giá hiển thị theo ngày thuê, chưa bao gồm chi phí phát sinh.'}</span>
         </div>
 
         {isLoading ? (

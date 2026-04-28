@@ -10,8 +10,10 @@ import { BookingPage } from './pages/bookings/BookingPage'
 import { MyBookingsPage } from './pages/bookings/MyBookingsPage'
 import { CarDetailPage } from './pages/cars/CarDetailPage'
 import { CarListingPage } from './pages/cars/CarListingPage'
+import { CustomerHomePage } from './pages/home/CustomerHomePage'
 import { HomePage } from './pages/home/HomePage'
 import { MyInvoicesPage } from './pages/payments/MyInvoicesPage'
+import { isAuthenticated } from './auth/authStorage'
 
 const authPages = {
   '/login': {
@@ -21,21 +23,15 @@ const authPages = {
     component: <LoginPage />,
   },
   '/verify-otp': {
-    title: 'Nhập mã xác thực',
-    description:
-      'Nhập mã OTP vừa được gửi đến email hoặc số điện thoại của bạn để tiếp tục đặt lại mật khẩu.',
+    hideIntro: true,
     component: <OtpPage />,
   },
   '/forgot-password': {
-    title: 'Khôi phục mật khẩu',
-    description:
-      'Nhập số điện thoại hoặc email đã đăng ký để nhận hướng dẫn đặt lại mật khẩu cho tài khoản của bạn.',
+    hideIntro: true,
     component: <ForgotPasswordPage />,
   },
   '/change-password': {
-    title: 'Đổi mật khẩu',
-    description:
-      'Tạo mật khẩu mới để bảo vệ tài khoản và tiếp tục quản lý chuyến xe an toàn hơn.',
+    hideIntro: true,
     component: <ChangePasswordPage />,
   },
   '/register': {
@@ -46,8 +42,14 @@ const authPages = {
   },
 }
 
+
 function App() {
-  const pathname = window.location.pathname
+  const rawPathname = window.location.pathname
+  const pathname =
+    rawPathname.length > 1 && rawPathname.endsWith('/')
+      ? rawPathname.slice(0, -1)
+      : rawPathname
+  const isAuthed = isAuthenticated()
   const currentAuthPage = authPages[pathname]
 
   if (currentAuthPage) {
@@ -55,6 +57,7 @@ function App() {
       <AuthLayout
         title={currentAuthPage.title}
         description={currentAuthPage.description}
+        hideIntro={currentAuthPage.hideIntro}
       >
         {currentAuthPage.component}
       </AuthLayout>
@@ -84,6 +87,18 @@ function App() {
   if (pathname.startsWith('/cars/')) {
     const carId = pathname.split('/')[2]
     return <CarDetailPage carId={carId} />
+  }
+
+  if (pathname === '/dashboard') {
+    return isAuthed ? <CustomerHomePage /> : <HomePage />
+  }
+
+  if (pathname === '/') {
+    return isAuthed ? <CustomerHomePage /> : <HomePage />
+  }
+
+  if (pathname === '/home') {
+    return <HomePage />
   }
 
   return <HomePage />

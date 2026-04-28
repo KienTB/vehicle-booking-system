@@ -104,8 +104,11 @@
   color: var(--color-text-primary);
   background: var(--color-surface-card);
   box-shadow: none;
+  font-family: var(--font-family-primary);
   font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
   line-height: var(--line-height-base);
+  letter-spacing: 0;
   transition:
     background var(--motion-instant),
     border-color var(--motion-instant),
@@ -114,10 +117,38 @@
 
 .auth-form__input::placeholder {
   color: var(--color-text-placeholder);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
+  letter-spacing: 0;
+  opacity: 1;
 }
 
 .auth-form__input:focus-visible {
   outline: none;
+}
+
+.auth-form__input:focus,
+.auth-form__input:not(:placeholder-shown) {
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
+  letter-spacing: 0;
+}
+
+.auth-form__input:-webkit-autofill,
+.auth-form__input:-webkit-autofill:hover,
+.auth-form__input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-text-primary);
+  -webkit-box-shadow: 0 0 0 1000px var(--color-surface-card) inset;
+  box-shadow: 0 0 0 1000px var(--color-surface-card) inset;
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-base);
+  caret-color: var(--color-text-primary);
 }
 
 .auth-form__input[aria-invalid='true'],
@@ -325,3 +356,138 @@
     width: 100%;
   }
 }
+
+/* ─── OTP Intro Block ───────────────────────────────────────────── */
+
+.auth-otp-intro {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.auth-otp-intro__eyebrow {
+  margin: 0;
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.auth-otp-intro__heading {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: clamp(var(--font-size-xl), 3vw, var(--font-size-2xl));
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+
+.auth-otp-intro__sub {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.auth-otp-intro__sub strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* ─── OTP Grid ──────────────────────────────────────────────────── */
+
+.auth-form__otp {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-3);
+}
+
+.auth-form__otp-input {
+  width: 3.35rem;
+  min-height: 3.85rem;
+  padding: 0;
+  border: 1px solid var(--color-border-default);
+  border-bottom: 3px solid var(--color-border-dark);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-primary);
+  background: var(--color-surface-card);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0;
+  line-height: 1;
+  text-align: center;
+  caret-color: var(--color-brand-primary);
+  transition:
+    border-color var(--motion-instant),
+    background var(--motion-instant),
+    box-shadow var(--motion-instant);
+}
+
+.auth-form__otp-input:focus-visible {
+  border-color: var(--color-brand-primary);
+  border-bottom-color: var(--color-brand-primary);
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-primary) 14%, transparent);
+}
+
+.auth-form__otp-input--error {
+  border-color: var(--color-state-error);
+  border-bottom-color: var(--color-state-error);
+}
+
+.auth-form__otp-input:not(:placeholder-shown):not(:focus-visible) {
+  border-bottom-color: var(--color-brand-primary);
+  background: color-mix(in srgb, var(--color-brand-primary) 4%, var(--color-surface-card));
+}
+
+/* ─── Resend Row ─────────────────────────────────────────────────── */
+
+.auth-form__resend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.auth-form__resend-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.auth-form__resend-btn:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.auth-form__resend-timer {
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── OTP Responsive ─────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .auth-form__otp {
+    gap: var(--space-2);
+  }
+
+  .auth-form__otp-input {
+    width: calc((100% - 5 * var(--space-2)) / 6);
+    min-height: 3.4rem;
+    font-size: var(--font-size-xl);
+  }
+
+  .auth-otp-intro__heading {
+    font-size: var(--font-size-xl);
+  }
+}
+
