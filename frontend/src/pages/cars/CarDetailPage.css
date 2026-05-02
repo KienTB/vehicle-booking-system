@@ -1,49 +1,105 @@
+@import './CarListingPage.css';
+
 .car-detail-page {
-  padding-bottom: var(--space-10);
+  min-height: 100svh;
+  color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-surface-muted) 16%, var(--color-surface-base));
 }
 
-.car-detail-hero,
+.car-detail-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 33rem;
+  padding-bottom: var(--space-8);
+  background: var(--color-surface-black);
+  isolation: isolate;
+}
+
+.car-detail-hero__backdrop,
+.car-detail-hero__overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.car-detail-hero__backdrop {
+  z-index: -3;
+  background:
+    radial-gradient(
+      circle at 74% 24%,
+      color-mix(in srgb, var(--color-brand-primary) 16%, transparent) 0,
+      transparent 34%
+    ),
+    linear-gradient(
+      122deg,
+      color-mix(in srgb, var(--color-surface-black) 96%, var(--color-surface-dark)) 0%,
+      color-mix(in srgb, var(--color-surface-dark) 76%, var(--color-surface-black)) 42%,
+      color-mix(in srgb, var(--color-surface-black) 92%, var(--color-surface-dark)) 100%
+    );
+}
+
+.car-detail-hero__backdrop::before {
+  position: absolute;
+  inset: 0;
+  background-image: url('/background2.png');
+  background-size: cover;
+  background-position: right center;
+  opacity: 0.28;
+  content: '';
+}
+
+.car-detail-hero__overlay {
+  z-index: -2;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-surface-black) 34%, transparent) 0%,
+      color-mix(in srgb, var(--color-surface-black) 54%, transparent) 68%,
+      color-mix(in srgb, var(--color-surface-black) 86%, transparent) 100%
+    );
+}
+
+.car-detail-hero__content,
 .car-detail-layout {
   width: min(100% - var(--space-8), 78rem);
   margin: 0 auto;
 }
 
-.car-detail-hero {
-  padding: var(--space-8) 0 var(--space-7);
-}
-
-.car-detail-hero__intro {
+.car-detail-hero__content {
+  position: relative;
+  z-index: 3;
   display: grid;
-  max-width: 48rem;
   gap: var(--space-4);
+  padding-top: var(--space-7);
 }
 
-.car-detail-hero h1 {
+.car-detail-hero__content h1 {
+  max-width: 16ch;
   margin: 0;
-  color: var(--color-text-primary);
-  font-size: clamp(2.4rem, 5vw, var(--font-size-hero));
+  color: var(--color-text-inverse);
+  font-size: clamp(2.3rem, 4.8vw, var(--font-size-hero));
   font-weight: var(--font-weight-bold);
-  line-height: var(--line-height-tight);
+  line-height: var(--line-height-heading);
 }
 
-.car-detail-hero p,
-.car-detail-hero span {
+.car-detail-hero__content > p {
+  max-width: 62ch;
   margin: 0;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-lg);
+  color: color-mix(in srgb, var(--color-text-inverse) 84%, var(--color-text-tertiary));
+  font-size: var(--font-size-md);
   line-height: var(--line-height-base);
 }
 
-.car-detail-hero span {
+.car-detail-hero__notice {
   display: inline-flex;
   width: fit-content;
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border-strong);
+  margin-top: var(--space-1);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--color-border-inverse) 36%, transparent);
   border-radius: var(--radius-pill);
-  color: var(--color-text-success);
-  background: color-mix(in srgb, var(--color-brand-primary-soft) 72%, var(--color-surface-card));
-  box-shadow: var(--shadow-sm);
-  font-size: var(--font-size-sm);
+  color: color-mix(in srgb, var(--color-text-inverse) 92%, var(--color-text-tertiary));
+  background: color-mix(in srgb, var(--color-surface-black) 42%, transparent);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -52,21 +108,22 @@
   grid-template-columns: minmax(0, 1fr) minmax(20rem, 24rem);
   align-items: start;
   gap: var(--space-7);
+  padding: var(--space-8) 0 var(--space-11);
 }
 
 .car-detail-main {
   display: grid;
-  min-width: 0;
   gap: var(--space-6);
+  min-width: 0;
 }
 
 .car-gallery,
-.car-detail-card,
+.car-detail-section,
 .booking-summary {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: color-mix(in srgb, var(--color-surface-card) 94%, transparent);
-  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-card);
+  box-shadow: var(--shadow-md);
 }
 
 .car-gallery {
@@ -78,9 +135,18 @@
 .car-gallery__stage {
   position: relative;
   overflow: hidden;
-  border-radius: calc(var(--radius-xl) - var(--space-1));
-  background: var(--color-surface-overlay);
+  border-radius: calc(var(--radius-lg) - var(--space-1));
+  background: var(--color-surface-black);
   aspect-ratio: 16 / 9;
+}
+
+.car-gallery__stage::after {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--color-surface-overlay) 56%, transparent)),
+    linear-gradient(135deg, color-mix(in srgb, var(--color-brand-primary) 12%, transparent), transparent 34%);
+  content: '';
 }
 
 .car-gallery__stage img {
@@ -89,28 +155,22 @@
   object-fit: cover;
 }
 
-.car-gallery__stage::after {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, transparent 62%, color-mix(in srgb, var(--color-surface-overlay) 62%, transparent)),
-    linear-gradient(135deg, color-mix(in srgb, var(--color-brand-primary) 14%, transparent), transparent 38%);
-  content: '';
-}
-
 .car-gallery__stage span {
   position: absolute;
   left: var(--space-4);
   bottom: var(--space-4);
   z-index: 1;
-  padding: var(--space-2) var(--space-4);
+  display: inline-flex;
+  min-height: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--space-3);
   border-radius: var(--radius-pill);
-  color: var(--color-brand-primary);
-  background: color-mix(in srgb, var(--color-surface-card) 90%, transparent);
-  box-shadow: var(--shadow-sm);
-  font-size: var(--font-size-sm);
+  color: var(--color-text-brand);
+  background: color-mix(in srgb, var(--color-surface-card) 92%, transparent);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-bold);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
 }
 
 .car-gallery__thumbs {
@@ -123,7 +183,7 @@
   overflow: hidden;
   padding: 0;
   border: 2px solid transparent;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
   aspect-ratio: 16 / 10;
   cursor: pointer;
@@ -140,31 +200,36 @@
   transform: translateY(-1px);
 }
 
+.car-gallery__thumbs button:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 2px;
+}
+
 .car-gallery__thumbs img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.car-detail-card {
+.car-detail-section {
   display: grid;
   gap: var(--space-5);
   padding: var(--space-6);
 }
 
-.car-detail-card__heading {
+.car-detail-section__heading {
   display: grid;
   gap: var(--space-3);
 }
 
-.car-detail-card h2 {
+.car-detail-section h2 {
   margin: 0;
   color: var(--color-text-primary);
-  font-size: var(--font-size-2xl);
+  font-size: clamp(1.5rem, 2.8vw, var(--font-size-2xl));
   line-height: var(--line-height-tight);
 }
 
-.car-detail-card p {
+.car-detail-section__description {
   margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-md);
@@ -181,8 +246,8 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
 }
 
@@ -198,23 +263,41 @@
   font-size: var(--font-size-sm);
 }
 
-.car-location-box {
+.car-detail-section--split {
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 20rem);
+  align-items: start;
+}
+
+.car-owner-note {
   display: grid;
   gap: var(--space-2);
   padding: var(--space-5);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background:
     linear-gradient(
       135deg,
-      color-mix(in srgb, var(--color-brand-primary-soft) 72%, transparent),
+      color-mix(in srgb, var(--color-brand-primary-soft) 64%, transparent),
       var(--color-surface-card)
     );
 }
 
-.car-location-box strong {
+.car-owner-note span {
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.car-owner-note strong {
   color: var(--color-text-primary);
   font-size: var(--font-size-lg);
+}
+
+.car-owner-note p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .car-trust {
@@ -227,20 +310,20 @@
   display: grid;
   gap: var(--space-4);
   padding: var(--space-5);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-lg);
   background: var(--color-surface-card);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .car-trust span {
   display: inline-flex;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-pill);
-  color: var(--color-brand-primary);
+  color: var(--color-text-brand);
   background: var(--color-brand-primary-soft);
   font-weight: var(--font-weight-bold);
 }
@@ -260,7 +343,7 @@
 
 .booking-summary {
   position: sticky;
-  top: var(--space-7);
+  top: var(--space-6);
   display: grid;
   gap: var(--space-5);
   padding: var(--space-5);
@@ -304,14 +387,17 @@
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background: var(--color-surface-card);
+  transition:
+    border-color var(--motion-instant),
+    background var(--motion-instant);
 }
 
 .booking-summary__form label:focus-within {
-  border-color: var(--color-border-focus);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-border-focus) 28%, transparent);
+  border-color: var(--color-border-dark);
+  background: color-mix(in srgb, var(--color-surface-muted) 24%, var(--color-surface-card));
 }
 
 .booking-summary__form input {
@@ -319,42 +405,43 @@
   border: 0;
   color: var(--color-text-primary);
   background: transparent;
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   outline: none;
 }
 
 .booking-summary__form button {
   display: inline-flex;
-  min-height: 3.5rem;
+  min-height: 3.2rem;
   align-items: center;
   justify-content: center;
   border: 0;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   color: var(--color-text-inverse);
   background: var(--color-brand-primary);
-  box-shadow: 0 14px 30px color-mix(in srgb, var(--color-brand-primary) 28%, transparent);
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
   transition:
     background var(--motion-instant),
-    box-shadow var(--motion-instant),
     transform var(--motion-instant);
 }
 
 .booking-summary__form button:hover {
   background: var(--color-brand-primary-hover);
-  box-shadow: 0 18px 36px color-mix(in srgb, var(--color-brand-primary) 34%, transparent);
   transform: translateY(-1px);
+}
+
+.booking-summary__form button:active {
+  background: var(--color-brand-primary-active);
 }
 
 .booking-summary__note {
   display: grid;
   gap: var(--space-2);
   padding: var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
   background: var(--color-surface-soft);
 }
 
@@ -370,10 +457,16 @@
   line-height: var(--line-height-base);
 }
 
-@media (max-width: 1080px) {
-  .car-detail-hero,
+.booking-summary__form input:focus-visible,
+.booking-summary__form button:focus-visible {
+  outline: 2px solid var(--color-border-focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 1160px) {
+  .car-detail-hero__content,
   .car-detail-layout {
-    width: min(100% - var(--space-6), 44rem);
+    width: min(100% - var(--space-6), 54rem);
   }
 
   .car-detail-layout,
@@ -383,40 +476,35 @@
 
   .booking-summary {
     position: static;
-    order: -1;
   }
 
-  .car-spec-grid {
+  .car-spec-grid,
+  .car-detail-section--split {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 680px) {
   .car-detail-hero {
-    padding: var(--space-7) 0 var(--space-5);
+    min-height: auto;
+    padding-bottom: var(--space-7);
   }
 
-  .car-detail-hero h1 {
-    font-size: 2.25rem;
+  .car-detail-hero__content h1 {
+    font-size: 2.2rem;
   }
 
-  .car-detail-hero p {
+  .car-detail-hero__content > p {
     font-size: var(--font-size-md);
   }
 
-  .car-gallery,
-  .car-detail-card,
-  .booking-summary {
-    border-radius: var(--radius-lg);
-  }
-
+  .car-spec-grid,
   .car-gallery__thumbs,
-  .car-spec-grid {
+  .car-detail-section--split {
     grid-template-columns: 1fr;
   }
 
-  .car-detail-card,
-  .booking-summary {
+  .car-detail-section {
     padding: var(--space-5);
   }
 }

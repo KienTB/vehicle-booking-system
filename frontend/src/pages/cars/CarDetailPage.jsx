@@ -36,12 +36,12 @@ const detailNotes = [
     description: 'Thông tin xe và đối tác cho thuê được kiểm tra trước khi hiển thị.',
   },
   {
-    title: 'Hỗ trợ trong chuyến đi',
+    title: 'Hỗ trợ nhanh trong chuyến đi',
     description: 'Đội ngũ hỗ trợ sẵn sàng đồng hành khi bạn cần thay đổi lịch trình.',
   },
   {
     title: 'Chính sách hủy rõ ràng',
-    description: 'Thông tin phí và điều kiện hủy được trình bày trước khi thanh toán.',
+    description: 'Thông tin phí và điều kiện hủy được hiển thị trước khi thanh toán.',
   },
 ]
 
@@ -53,7 +53,7 @@ function normalizeCar(payload, id) {
   const data = payload?.data ?? payload
 
   if (!data || typeof data !== 'object') {
-    return fallbackCar
+    return { ...fallbackCar, id: id || fallbackCar.id }
   }
 
   const imageList = Array.isArray(data.images)
@@ -77,12 +77,7 @@ function normalizeCar(payload, id) {
     images:
       imageList.length > 0
         ? imageList
-        : [
-            data.primaryImageUrl,
-            data.imageUrl,
-            data.thumbnailUrl,
-            fallbackCar.images[0],
-          ].filter(Boolean),
+        : [data.primaryImageUrl, data.imageUrl, data.thumbnailUrl, fallbackCar.images[0]].filter(Boolean),
   }
 }
 
@@ -146,40 +141,47 @@ export function CarDetailPage({ carId }) {
   }
 
   return (
-    <main className="site-page car-detail-page">
-      <header className="site-nav">
-        <a className="site-nav__brand" href="/" aria-label="Carento">
-          <img src="/logo.png" alt="" aria-hidden="true" />
-          <span>Carento</span>
-        </a>
+    <main className="car-detail-page">
+      <section className="car-detail-hero" aria-labelledby="car-detail-title">
+        <div className="car-detail-hero__backdrop" aria-hidden="true" />
+        <div className="car-detail-hero__overlay" aria-hidden="true" />
 
-        <nav className="site-nav__links" aria-label="Điều hướng chính">
-          <a href="/">Trang chủ</a>
-          <a href="/cars" aria-current="page">
-            Danh sách xe
+        <header className="cars-nav">
+          <a className="cars-nav__brand" href="/" aria-label="Carento">
+            <img src="/logo.png" alt="" aria-hidden="true" />
+            <span>Carento</span>
           </a>
-          <a href="/my-bookings">Đặt xe của tôi</a>
-        </nav>
 
-        <div className="site-nav__actions">
-          <a className="site-button site-button--ghost" href="/login">
-            Đăng nhập
-          </a>
-          <a className="site-button site-button--primary" href="/register">
-            Tạo tài khoản
-          </a>
-        </div>
-      </header>
+          <nav className="cars-nav__links" aria-label="Điều hướng chính">
+            <a href="/">Trang chủ</a>
+            <a href="/cars" aria-current="page">
+              Danh sách xe
+            </a>
+            <a href="/my-bookings">Đặt xe của tôi</a>
+          </nav>
 
-      <section className="car-detail-hero">
-        <div className="car-detail-hero__intro">
-          <p className="site-eyebrow">Chi tiết xe thuê</p>
-          <h1>{car.name}</h1>
+          <div className="cars-nav__actions">
+            <a className="cars-button cars-button--secondary" href="/login">
+              Đăng nhập
+            </a>
+            <a className="cars-button cars-button--primary" href="/register">
+              Tạo tài khoản
+            </a>
+          </div>
+        </header>
+
+        <div className="car-detail-hero__content">
+          <p className="cars-eyebrow">Showroom chi tiết xe</p>
+          <h1 id="car-detail-title">{car.name}</h1>
           <p>
-            {car.brand} tại {car.location}. Kiểm tra thông tin xe, giá thuê và lịch nhận xe
-            trước khi gửi yêu cầu đặt.
+            {car.brand} tại {car.location}. Kiểm tra ảnh xe thực tế, thông số nhanh và lịch
+            nhận xe trước khi xác nhận đặt.
           </p>
-          {notice ? <span>{notice}</span> : null}
+          {notice ? (
+            <span className="car-detail-hero__notice" role="status">
+              {notice}
+            </span>
+          ) : null}
         </div>
       </section>
 
@@ -204,30 +206,32 @@ export function CarDetailPage({ carId }) {
             </div>
           </section>
 
-          <section className="car-detail-card">
-            <div className="car-detail-card__heading">
-              <p className="site-eyebrow">Thông tin xe</p>
-              <h2>{car.brand} dành cho lịch trình linh hoạt</h2>
+          <section className="car-detail-section">
+            <div className="car-detail-section__heading">
+              <p className="cars-eyebrow">Thông tin xe</p>
+              <h2>{car.brand} phù hợp cho hành trình linh hoạt</h2>
             </div>
-            <p>{car.description}</p>
+            <p className="car-detail-section__description">{car.description}</p>
             <div className="car-spec-grid">
               {specs.map((spec) => (
-                <div className="car-spec" key={spec.label}>
+                <article className="car-spec" key={spec.label}>
                   <span>{spec.label}</span>
                   <strong>{spec.value}</strong>
-                </div>
+                </article>
               ))}
             </div>
           </section>
 
-          <section className="car-detail-card">
-            <div className="car-detail-card__heading">
-              <p className="site-eyebrow">Giao nhận xe</p>
-              <h2>Địa điểm rõ ràng, thuận tiện trước chuyến đi</h2>
+          <section className="car-detail-section car-detail-section--split">
+            <div>
+              <p className="cars-eyebrow">Giao nhận xe</p>
+              <h2>Điểm nhận xe thuận tiện, thông tin rõ ràng trước chuyến đi</h2>
+              <p className="car-detail-section__description">{car.deliveryLocation}</p>
             </div>
-            <div className="car-location-box">
-              <strong>{car.location}</strong>
-              <p>{car.deliveryLocation}</p>
+            <div className="car-owner-note">
+              <span>Chủ xe</span>
+              <strong>{car.ownerName}</strong>
+              <p>{car.location}</p>
             </div>
           </section>
 
@@ -260,6 +264,7 @@ export function CarDetailPage({ carId }) {
                 type="date"
                 value={pickupDate}
                 onChange={(event) => setPickupDate(event.target.value)}
+                required
               />
             </label>
             <label>
@@ -268,14 +273,18 @@ export function CarDetailPage({ carId }) {
                 type="date"
                 value={returnDate}
                 onChange={(event) => setReturnDate(event.target.value)}
+                required
               />
             </label>
             <button type="submit">Đặt xe ngay</button>
           </form>
 
           <div className="booking-summary__note">
-            <strong>Chưa cần thanh toán ngay</strong>
-            <p>Bạn có thể gửi yêu cầu đặt xe trước, hệ thống sẽ giữ xe trong thời gian chờ xác nhận.</p>
+            <strong>Giữ xe trong thời gian chờ thanh toán</strong>
+            <p>
+              Sau khi xác nhận, đơn đặt xe sẽ ở trạng thái chờ thanh toán và được giữ theo
+              thời gian hệ thống quy định.
+            </p>
           </div>
         </aside>
       </section>

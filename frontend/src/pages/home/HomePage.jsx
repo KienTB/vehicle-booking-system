@@ -1,37 +1,131 @@
+import { useEffect, useRef } from 'react'
 import './HomePage.css'
 
-const featuredCars = [
-  {
-    id: 1,
-    name: 'Toyota Vios 2023',
-    brand: 'Toyota',
-    location: 'Quận 1, TP. Hồ Chí Minh',
-    price: '720.000đ',
-    specs: ['5 chỗ', 'Tự động', 'Xăng'],
-  },
-  {
-    id: 2,
-    name: 'Mazda CX-5 Premium',
-    brand: 'Mazda',
-    location: 'Cầu Giấy, Hà Nội',
-    price: '1.150.000đ',
-    specs: ['5 chỗ', 'Tự động', 'Xăng'],
-  },
-  {
-    id: 3,
-    name: 'Kia Carnival Luxury',
-    brand: 'Kia',
-    location: 'Hải Châu, Đà Nẵng',
-    price: '1.680.000đ',
-    specs: ['7 chỗ', 'Tự động', 'Dầu'],
-  },
+const platformBenefits = [
+  'Xe được kiểm duyệt trước khi mở lịch thuê',
+  'Giá thuê minh bạch theo từng ngày',
+  'Quy trình đặt xe tối ưu, xác nhận nhanh',
+  'Hỗ trợ toàn hành trình khi cần thay đổi',
 ]
 
-const serviceNotes = [
-  'Xe được kiểm định trước khi giao',
-  'Giá thuê rõ ràng theo từng ngày',
-  'Hỗ trợ nhanh khi thay đổi lịch trình',
+const hostBenefits = [
+  'Tăng thu nhập từ xe nhàn rỗi với quy trình rõ ràng',
+  'Chủ động lịch cho thuê, thời gian bàn giao và mức giá',
+  'Được hỗ trợ vận hành và chăm sóc khách thuê xuyên suốt',
 ]
+
+const memberOffers = [
+  'Ưu đãi giảm giá theo hạng thành viên',
+  'Voucher định kỳ cho các chuyến đi cuối tuần',
+  'Quyền lợi đặt xe sớm với các dòng xe nổi bật',
+]
+
+const BRAND_LOGOS = [
+  { src: '/audi-logo.png', alt: 'Audi' },
+  { src: '/bentley-logo.png', alt: 'Bentley' },
+  { src: '/bmw-logo.png', alt: 'BMW' },
+  { src: '/cadillac-logo.png', alt: 'Cadillac' },
+  { src: '/ferrari-logo.png', alt: 'Ferrari' },
+  { src: '/ford-logo.png', alt: 'Ford' },
+  { src: '/honda-logo.png', alt: 'Honda' },
+  { src: '/hyundai-logo.png', alt: 'Hyundai' },
+  { src: '/Land-Rover-logo.png', alt: 'Land Rover' },
+  { src: '/Lexus-logo.png', alt: 'Lexus' },
+  { src: '/Maybach-logo.png', alt: 'Maybach' },
+  { src: '/nissan-logo.png', alt: 'Nissan' },
+  { src: '/porsche-logo.png', alt: 'Porsche' },
+  { src: '/tesla-logo.png', alt: 'Tesla' },
+  { src: '/toyota-logo.png', alt: 'Toyota' },
+  { src: '/vinfast-logo.png', alt: 'Vinfast' },
+]
+
+function spawnPuff(container, count = 1) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const p = document.createElement('div')
+      p.className = 'car-cta__puff'
+      const size = 8 + Math.random() * 7
+      p.style.cssText = [
+        `width:${size}px`,
+        `height:${size}px`,
+        `top:${-4 + Math.random() * 8}px`,
+        `left:${Math.random() * 4}px`,
+        `animation-delay:${Math.random() * 0.1}s`,
+      ].join(';')
+      container.appendChild(p)
+      setTimeout(() => p.remove(), 800)
+    }, i * 65)
+  }
+}
+
+function CarButton({ emoji, label, href, delay }) {
+  const carRef  = useRef(null)
+  const puffRef = useRef(null)
+  const revRef  = useRef(null)
+  const doneRef = useRef(false)
+
+  useEffect(() => {
+    const car = carRef.current
+    if (!car) return
+    const onEnd = (e) => {
+      if (e.animationName === 'car-drive-in') {
+        car.classList.remove('is-entering')
+        car.classList.add('is-idle')
+      }
+    }
+    car.addEventListener('animationend', onEnd)
+    return () => car.removeEventListener('animationend', onEnd)
+  }, [])
+
+  const handleEnter = () => {
+    if (doneRef.current) return
+    carRef.current?.classList.add('is-revving')
+    revRef.current = setInterval(() => spawnPuff(puffRef.current, 1), 190)
+  }
+
+  const handleLeave = () => {
+    carRef.current?.classList.remove('is-revving')
+    clearInterval(revRef.current)
+  }
+
+  const handleClick = (e) => {
+    e.preventDefault()
+    if (doneRef.current) return
+    doneRef.current = true
+    clearInterval(revRef.current)
+    carRef.current?.classList.remove('is-revving')
+    spawnPuff(puffRef.current, 6)
+    setTimeout(() => {
+      carRef.current?.classList.remove('is-idle')
+      carRef.current?.classList.add('is-vroom')
+      setTimeout(() => { window.location.href = href }, 480)
+    }, 80)
+  }
+
+  return (
+    <button
+      className="car-cta__btn"
+      title={label}
+      aria-label={label}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onClick={handleClick}
+      style={{ '--car-delay': `${delay}ms` }}
+    >
+      <div className="car-cta__track">
+        <span
+          ref={carRef}
+          className="car-cta__emoji is-entering"
+          aria-hidden="true"
+        >
+          {emoji}
+        </span>
+        <div ref={puffRef} className="car-cta__puff-wrap" aria-hidden="true" />
+      </div>
+      <span className="car-cta__label">{label}</span>
+    </button>
+  )
+}
 
 export function HomePage() {
   return (
@@ -47,139 +141,113 @@ export function HomePage() {
           </a>
 
           <nav className="home-nav__links" aria-label="Điều hướng chính">
-            <a href="/" aria-current="page">
-              Trang chủ
-            </a>
+            <a href="/" aria-current="page">Trang chủ</a>
             <a href="/cars">Danh sách xe</a>
-            <a href="/my-bookings">Đặt xe của tôi</a>
+            <a href="/become-host">Đăng ký cho thuê xe</a>
+            <a href="/offers">Ưu đãi & Thành viên</a>
           </nav>
 
           <div className="home-nav__actions">
-            <a className="home-button home-button--secondary" href="/login">
+            <a className="home-button home-button--primary" href="/login">
               Đăng nhập
-            </a>
-            <a className="home-button home-button--primary" href="/register">
-              Tạo tài khoản
             </a>
           </div>
         </header>
 
         <div className="home-hero__content">
-          <p className="home-eyebrow">Nền tảng đặt xe tự lái</p>
-          <h1 id="home-title">Thuê xe phù hợp với lịch trình của bạn trong vài bước.</h1>
+          <p className="home-eyebrow">Nền tảng di chuyển cao cấp</p>
+          <h1 id="home-title">
+            Carento mang đến trải nghiệm thuê xe tiện lợi, minh bạch và an tâm.
+          </h1>
           <p className="home-hero__summary">
-            Tìm xe theo địa điểm, thời gian, nhu cầu sử dụng và mức chi phí mong muốn.
-            Trải nghiệm đặt xe được giữ rõ ràng để bạn quyết định nhanh và yên tâm hơn.
+            Từ các chuyến đi công việc đến nghỉ dưỡng cuối tuần, Carento giúp bạn lựa chọn xe
+            nhanh hơn với chất lượng được kiểm soát và quy trình nhất quán.
           </p>
 
-          <form className="home-search" aria-label="Tìm kiếm xe thuê">
-            <label>
-              <span>Địa điểm nhận xe</span>
-              <input type="text" placeholder="Thành phố hoặc quận" />
-            </label>
-
-            <label>
-              <span>Ngày nhận xe</span>
-              <input type="date" />
-            </label>
-
-            <label>
-              <span>Ngày trả xe</span>
-              <input type="date" />
-            </label>
-
-            <label>
-              <span>Loại xe / số chỗ</span>
-              <select defaultValue="">
-                <option value="" disabled>
-                  Chọn loại xe
-                </option>
-                <option value="4">Sedan 4-5 chỗ</option>
-                <option value="7">SUV/MPV 7 chỗ</option>
-                <option value="16">Minibus 16 chỗ</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Hộp số</span>
-              <select defaultValue="">
-                <option value="" disabled>
-                  Tất cả
-                </option>
-                <option value="AUTOMATIC">Tự động</option>
-                <option value="MANUAL">Số sàn</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Loại nhiên liệu</span>
-              <select defaultValue="">
-                <option value="" disabled>
-                  Tất cả
-                </option>
-                <option value="GASOLINE">Xăng</option>
-                <option value="DIESEL">Dầu</option>
-                <option value="ELECTRIC">Điện</option>
-                <option value="HYBRID">Hybrid</option>
-              </select>
-            </label>
-
-            <label>
-              <span>Khoảng giá</span>
-              <select defaultValue="">
-                <option value="" disabled>
-                  Chọn mức giá
-                </option>
-                <option value="0-800000">Dưới 800.000đ/ngày</option>
-                <option value="800000-1300000">800.000đ - 1.300.000đ/ngày</option>
-                <option value="1300000-2000000">1.300.000đ - 2.000.000đ/ngày</option>
-              </select>
-            </label>
-
-            <a className="home-search__submit" href="/cars">
-              Tìm xe
-            </a>
-          </form>
+          <div className="hero-marquee" aria-label="Các hãng xe trên Carento">
+            <div className="hero-marquee__label">Có mặt trên nền tảng</div>
+            <div className="hero-marquee__track" aria-hidden="true">
+              <div className="hero-marquee__inner">
+                {[...BRAND_LOGOS, ...BRAND_LOGOS].map((logo, i) => (
+                  <img
+                    key={i}
+                    src={logo.src}
+                    alt={logo.alt}
+                    className="hero-marquee__logo"
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="home-flow" aria-label="Gợi ý xe và lợi ích dịch vụ">
-        <div className="home-flow__intro">
-          <p className="home-eyebrow">Gợi ý hôm nay</p>
-          <h2>Những lựa chọn dễ bắt đầu cho chuyến đi sắp tới.</h2>
-          <a href="/cars">Xem tất cả xe</a>
+      <section className="home-manifesto" aria-label="Tuyên ngôn Carento">
+        <div className="home-manifesto__content">
+          <p className="home-eyebrow home-eyebrow--dark">Why Carento</p>
+          <h2>Nền tảng thuê xe tập trung vào chất lượng dịch vụ và sự minh bạch.</h2>
+          <p>
+            Carento kết hợp vận hành công nghệ và trải nghiệm dịch vụ thực tế để mỗi chuyến đi của
+            bạn luôn rõ ràng từ lúc chọn xe đến khi hoàn tất hành trình.
+          </p>
         </div>
+        <figure className="home-manifesto__visual">
+          <img src="/image2.jpg" alt="Hành trình lái xe trên cung đường rộng mở" />
+        </figure>
+      </section>
 
-        <div className="home-cars">
-          {featuredCars.map((car) => (
-            <article className="home-car" key={car.id}>
-              <a className="home-car__media" href={`/cars/${car.id}`}>
-                <img src="/background.png" alt={`Hình ảnh ${car.name}`} />
-              </a>
-              <div className="home-car__content">
-                <p>{car.brand}</p>
-                <h3>{car.name}</h3>
-                <span>{car.location}</span>
-                <div className="home-car__specs">
-                  {car.specs.map((spec) => (
-                    <small key={spec}>{spec}</small>
-                  ))}
-                </div>
-                <div className="home-car__footer">
-                  <strong>{car.price}</strong>
-                  <span>/ ngày</span>
-                  <a href={`/cars/${car.id}`}>Xem chi tiết</a>
-                </div>
-              </div>
-            </article>
-          ))}
+      <section className="home-benefit-rail" aria-label="Ba lý do chọn Carento">
+        {platformBenefits.slice(0, 3).map((item) => (
+          <article key={item}>
+            <span>0{platformBenefits.indexOf(item) + 1}</span>
+            <p>{item}</p>
+          </article>
+        ))}
+      </section>
+
+      <section className="home-campaign" aria-label="Dành cho chủ xe">
+        <div className="home-campaign__backdrop" aria-hidden="true">
+          <img src="/image3.jpg" alt="" />
         </div>
+        <div className="home-campaign__content">
+          <p className="home-eyebrow">Dành cho chủ xe</p>
+          <h2>Biến xe nhàn rỗi thành nguồn thu ổn định cùng Carento.</h2>
+          <p>
+            Chúng tôi cung cấp quy trình đăng ký rõ ràng, hỗ trợ vận hành và tiêu chuẩn dịch vụ
+            nhất quán để bạn cho thuê xe hiệu quả hơn.
+          </p>
+          <ul>
+            {hostBenefits.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <a className="home-button home-button--primary" href="/become-host">
+            Đăng ký cho thuê xe
+          </a>
+        </div>
+      </section>
 
+      <section className="home-member-banner" aria-label="Ưu đãi và thành viên">
+        <figure className="home-member-banner__visual" aria-hidden="true">
+          <img src="/image4.jpg" alt="" />
+        </figure>
+        <div className="home-member-banner__content">
+          <p className="home-eyebrow">Ưu đãi & thành viên</p>
+          <h2>Tích lũy quyền lợi để mỗi chuyến đi trở nên linh hoạt hơn.</h2>
+          <ul className="home-member-banner__list">
+            {memberOffers.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <a className="home-member-banner__link" href="/offers">
+            Xem thêm ưu đãi
+          </a>
+        </div>
       </section>
 
       <footer className="home-footer" aria-label="Điều hướng và hỗ trợ cuối trang">
         <div className="home-footer__trust">
-          {serviceNotes.map((note) => (
+          {platformBenefits.slice(0, 3).map((note) => (
             <p key={note}>{note}</p>
           ))}
         </div>
@@ -190,15 +258,15 @@ export function HomePage() {
               <img src="/logo.png" alt="" aria-hidden="true" />
               <strong>Carento</strong>
             </a>
-            <p>Thuê xe tự lái linh hoạt, rõ ràng và đáng tin cậy cho mọi hành trình.</p>
+            <p>Nền tảng kết nối thuê xe cao cấp với quy trình rõ ràng và trải nghiệm đáng tin cậy.</p>
           </div>
 
           <nav className="home-footer__nav" aria-label="Điều hướng nhanh">
             <h3>Điều hướng nhanh</h3>
             <a href="/">Trang chủ</a>
             <a href="/cars">Danh sách xe</a>
-            <a href="/my-bookings">Đặt xe của tôi</a>
-            <a href="/login">Đăng nhập / Tạo tài khoản</a>
+            <a href="/become-host">Đăng ký cho thuê xe</a>
+            <a href="/offers">Ưu đãi & Thành viên</a>
           </nav>
 
           <section className="home-footer__support" aria-label="Hỗ trợ khách hàng">
@@ -206,21 +274,15 @@ export function HomePage() {
             <a href="tel:19001234">Hotline: 1900 1234</a>
             <a href="mailto:hotro@carento.vn">Email: hotro@carento.vn</a>
             <div className="home-footer__social" aria-label="Kết nối Carento">
-              <a href="#" aria-label="Facebook Carento">
-                Fb
-              </a>
-              <a href="#" aria-label="Instagram Carento">
-                Ig
-              </a>
-              <a href="#" aria-label="Zalo Carento">
-                Zl
-              </a>
+              <a href="#" aria-label="Facebook Carento">Fb</a>
+              <a href="#" aria-label="Instagram Carento">Ig</a>
+              <a href="#" aria-label="Zalo Carento">Zl</a>
             </div>
           </section>
         </div>
 
         <div className="home-footer__bottom">
-          <small>© 2026 Carento. Trải nghiệm thuê xe tự lái theo cách của bạn.</small>
+          <small>© 2026 Carento. Trải nghiệm di chuyển linh hoạt theo cách của bạn.</small>
         </div>
       </footer>
     </main>
